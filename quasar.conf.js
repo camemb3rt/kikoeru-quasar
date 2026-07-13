@@ -95,17 +95,17 @@ module.exports = function (ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       https: false,
-      port: 8080,
+      port: 5233,
       open: true, // opens browser window automatically
       proxy: {
         // https://webpack.js.org/configuration/dev-server/#devserverproxy
-        // proxy all requests starting with /api to http://localhost:8888
-        '/api': 'http://localhost:8888',
+        // proxy all requests starting with /api to http://localhost:5232
+        '/api': 'http://localhost:5232',
         '/socket.io': {
-          target: 'http://localhost:8888',
+          target: 'http://localhost:5232',
           ws: true
         },
-        '/workbox': 'http://localhost:8888',
+        '/workbox': 'http://localhost:5232',
       }
     },
 

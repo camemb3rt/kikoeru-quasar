@@ -3,27 +3,27 @@
     <q-card class="q-ma-md">
       <q-form @submit="updateAdminPassword()">
         <q-toolbar>
-          <q-toolbar-title>修改管理员密码</q-toolbar-title>
+          <q-toolbar-title>Change admin password</q-toolbar-title>
         </q-toolbar>
 
         <div class="q-pa-sm">
-          <q-input outlined dense type="password" label="新密码"
+          <q-input outlined dense type="password" label="New Password"
             v-model="adminNewPassword"
             lazy-rules
-            :rules="[ val => val.length >= 5 || '密码长度至少为 5' ]"
+            :rules="[ val => val.length >= 5 || 'Must be at least 5 characters' ]"
           />
 
-          <q-input outlined dense type="password" label="确认密码"
+          <q-input outlined dense type="password" label="Repeat New Password"
             v-model="adminConfirmPassword"
             lazy-rules
             :rules="[
-              val => val.length >= 5 || '密码长度至少为 5',
-              val => val === adminNewPassword || '两次密码输入不一致'
+              val => val.length >= 5 || 'Must be at least 5 characters',
+              val => val === adminNewPassword || 'Passwords do not match'
             ]"
           />
 
           <div class="row justify-end">
-            <q-btn :loading="loadingUpdateAdminPassword" type="submit" color="primary" label="修改" />
+            <q-btn :loading="loadingUpdateAdminPassword" type="submit" color="primary" label="Update" />
           </div>
         </div>
       </q-form>
@@ -32,30 +32,30 @@
     <q-card class="q-ma-md">
       <q-form @submit="addNewUser()">
         <q-toolbar>
-          <q-toolbar-title>添加新用户</q-toolbar-title>
+          <q-toolbar-title>Add a new user</q-toolbar-title>
         </q-toolbar>
 
         <div class="q-pa-sm">
-          <q-select dense outlined label="用户组" v-model="newuser.group" :options="groups" class="q-mb-md" />
+          <q-select dense outlined label="User Group" v-model="newuser.group" :options="groups" class="q-mb-md" />
 
           <q-input outlined dense
-            v-model="newuser.name" label="用户名"
+            v-model="newuser.name" label="Username"
             required
             lazy-rules
             :rules="[
-                val => val.length >= 5 || '用户名长度至少为 5',
-                val => !users.find(user => user.name === val) || '该名称已存在，用户名不能重复',
+                val => val.length >= 5 || 'Must be at least 5 characters',
+                val => !users.find(user => user.name === val) || 'This name is already in use',
               ]" 
           />
 
-          <q-input outlined dense label="密码"
+          <q-input outlined dense label="Password"
             v-model="newuser.password"
             lazy-rules
-            :rules="[ val => val.length >= 5 || '密码长度至少为 5' ]"
+            :rules="[ val => val.length >= 5 || 'Must be at least 5 characters' ]"
           />
 
           <div class="row justify-end">
-            <q-btn :loading="loadingAddNewUser" type="submit" color="primary" label="添加" />
+            <q-btn :loading="loadingAddNewUser" type="submit" color="primary" label="Create" />
           </div>
         </div>
       </q-form>
@@ -63,7 +63,7 @@
 
     <q-card class="q-ma-md q-pa-sm">
       <q-table
-        title="所有用户"
+        title="All users"
         :data="users"
         :columns="columns"
         row-key="name"
@@ -72,19 +72,19 @@
         :selected.sync="selected"
       />
       <div class="row justify-end">
-        <q-btn :loading="loadingDeleteUsers" :disable="selected.length === 0" @click="confirm = true" color="primary" label="删除" />
+        <q-btn :loading="loadingDeleteUsers" :disable="selected.length === 0" @click="confirm = true" color="primary" label="Delete" />
       </div>
     </q-card>
 
     <q-dialog v-model="confirm" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <span class="q-ma-sm text-h6">确认删除选中用户？</span>
+          <span class="q-ma-sm text-h6">Are you sure you want to delete this user?</span>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="取消" color="primary" v-close-popup />
-          <q-btn flat label="确认" color="primary" @click="deleteUsers()" v-close-popup />
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Confirm" color="primary" @click="deleteUsers()" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -101,8 +101,8 @@ export default {
     return {
       selected: [],
       columns: [
-        { name: 'desc', required: true, label: '用户名', align: 'left', field: 'name', sortable: true },
-        { name: 'calories', required: true, label: '用户组', align: 'center', field: 'group', sortable: true },
+        { name: 'desc', required: true, label: 'Username', align: 'left', field: 'name', sortable: true },
+        { name: 'calories', required: true, label: 'User Group', align: 'center', field: 'group', sortable: true },
       ],
       users: [],
       loadingDeleteUsers: false,

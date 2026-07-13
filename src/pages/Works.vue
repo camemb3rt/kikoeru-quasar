@@ -34,13 +34,13 @@
             transition-hide="scale"
             v-model="sortOption"
             :options="sortOptions"
-            label="排序"
+            label="Sort"
             class="col-auto"
             :bg-color="$q.dark.isActive ? 'black' : 'white'"
           />
 
           <!-- 是否包含字幕 -->
-          <q-toggle v-model="lyricStatus" label="是否包含字幕" @input="onLyricStatusChange"></q-toggle>
+          <q-toggle v-model="lyricStatus" label="Require Subtitles" @input="onLyricStatusChange"></q-toggle>
 
           <!-- 切换显示模式按钮 -->
           <q-btn-toggle
@@ -118,21 +118,21 @@ export default {
       seed: 7, // random sort
 
       // 排序标签按钮
-      sortOption: { label: '最新收录', order: 'add_time', sort: 'desc' },
+      sortOption: { label: 'Newest', order: 'add_time', sort: 'desc' },
       sortOptions: [
-        { label: '最新收录', order: 'add_time', sort: 'desc' },
-        { label: '发售日期倒序', order: 'release', sort: 'desc' },
-        { label: '我的评价排序', order: 'rating', sort: 'desc' },
-        { label: '发售日期顺序', order: 'release', sort: 'asc' },
-        { label: '售出数量倒序', order: 'dl_count', sort: 'desc' },
-        { label: '价格顺序', order: 'price', sort: 'asc' },
-        { label: '价格倒序', order: 'price', sort: 'desc' },
-        { label: '评价倒序', order: 'rate_average_2dp', sort: 'desc' },
-        { label: '评论数量倒序', order: 'review_count', sort: 'desc' },
-        { label: 'RJ号倒序', order: 'id', sort: 'desc' },
-        { label: 'RJ号顺序', order: 'id', sort: 'asc' },
-        { label: '全年龄顺序', order: 'nsfw', sort: 'asc' },
-        { label: '随机排序', order: 'random', sort: 'desc' }
+        { label: 'Newest', order: 'add_time', sort: 'desc' },
+        { label: 'Release date descending', order: 'release', sort: 'desc' },
+        { label: 'My rating descending', order: 'rating', sort: 'desc' },
+        { label: 'Release date ascending', order: 'release', sort: 'asc' },
+        { label: 'Sales count descending', order: 'dl_count', sort: 'desc' },
+        { label: 'Price ascending', order: 'price', sort: 'asc' },
+        { label: 'Price descending', order: 'price', sort: 'desc' },
+        { label: 'Rating descending', order: 'rate_average_2dp', sort: 'desc' },
+        { label: 'Review count descending', order: 'review_count', sort: 'desc' },
+        { label: 'RJ code descending', order: 'id', sort: 'desc' },
+        { label: 'RJ code ascending', order: 'id', sort: 'asc' },
+        { label: 'SFW only', order: 'nsfw', sort: 'asc' },
+        { label: 'Random', order: 'random', sort: 'desc' }
       ],
       // 是否包含字幕
       lyricStatus: false,

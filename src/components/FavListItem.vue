@@ -45,11 +45,11 @@
       <q-item-label class="q-pt-xs" v-if="mode === 'progress'">
         <q-btn-toggle v-if="mode === 'progress'" v-model="progress" @input="setProgress" dense no-caps rounded
           toggle-color="primary" color="white" text-color="black" :options="[
-            { label: '想听', value: 'marked' },
-            { label: '在听', value: 'listening' },
-            { label: '听过', value: 'listened' },
-            { label: '重听', value: 'replay' },
-            { label: '搁置', value: 'postponed' }
+          { label: 'Plan to Listen', value: 'marked' },
+          { label: 'Listening', value: 'listening' },
+          { label: 'Completed', value: 'listened' },
+          { label: 'Replaying', value: 'replay' },
+          { label: 'Postponed', value: 'postponed' }
           ]" />
       </q-item-label>
     </q-item-section>

@@ -145,7 +145,7 @@
           @click="showCurrentPlayList = !showCurrentPlayList"
           class="q-ma-sm"
         >
-          <q-tooltip>打开当前播放列表</q-tooltip>
+          <q-tooltip>Open playlist</q-tooltip>
         </q-btn>
         <!-- 播放模式 -->
         <q-btn
@@ -157,7 +157,7 @@
           @click="changePlayMode()"
           class="q-ma-sm"
         >
-          <q-tooltip>播放模式: {{ this.playModeName() }}</q-tooltip>
+          <q-tooltip>{{ this.playModeName() }}</q-tooltip>
         </q-btn>
         <!-- 打开作品详情 -->
         <q-btn
@@ -169,7 +169,7 @@
           @click="openWorkDetail()"
           class="q-ma-sm"
         >
-          <q-tooltip>打开作品详情</q-tooltip>
+          <q-tooltip>Open work details</q-tooltip>
         </q-btn>
       </div>
     </q-card>
@@ -509,13 +509,13 @@ export default {
     playModeName() {
       switch (this.playMode.name) {
         case "order":
-          return "顺序播放";
+          return "Normal";
         case "all repeat":
-          return "列表循环";
+          return "Repeat";
         case "repeat once":
-          return "单曲循环";
+          return "Repeat Once";
         case "shuffle":
-          return "随机播放";
+          return "Shuffle";
       }
     },
 

@@ -3,7 +3,7 @@
     <q-header elevated class="bg-black">
       <q-toolbar>
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
-        <q-toolbar-title>仪表盘</q-toolbar-title>
+        <q-toolbar-title>Dashboard</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -63,28 +63,28 @@ export default {
       miniState: true,
       links: [
         {
-          title: '音声库',
+          title: 'Folders',
           icon: 'folder',
           path: '/admin'
         },
         {
-          title: '扫描',
+          title: 'Scanner',
           icon: 'youtube_searched_for',
           path: '/admin/scanner'
         },
         {
-          title: '用户管理',
+          title: 'Users',
           icon: 'person',
           path: '/admin/usermanage'
         },
         {
-          title: '高级设置',
+          title: 'Advanced',
           icon: 'settings',
           path: '/admin/advanced'
         },
 
         {
-          title: '回到主页',
+          title: 'Back Home',
           icon: 'home',
           path: '/'
         }

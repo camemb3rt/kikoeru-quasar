@@ -8,19 +8,19 @@
             <q-tooltip>
               <div class="text-subtitle2">
                 <q-icon dense name="auto_awesome_motion" />
-                显示缩略图
+                Show thumbnails
               </div>
               <div class="text-subtitle2">
                 <q-icon name="pageview" />
-                新页面查看
+                Open in new window
               </div>
               <div class="text-subtitle2">
                 <q-icon name="download" />
-                下载文件
+                Download
               </div>
               <div class="text-subtitle2">
                 <q-icon name="open_in_full" />
-                全屏幕显示
+                Fullscreen
               </div>
             </q-tooltip>
           </q-btn>

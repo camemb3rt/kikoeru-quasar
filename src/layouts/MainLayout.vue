@@ -87,7 +87,7 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                随心听
+                Random Play
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -99,7 +99,7 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                睡眠模式
+                Sleep Mode
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -115,10 +115,10 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                深色模式
+                Dark Mode
               </q-item-label>
               <q-item-label class="text-caption text-grey">
-                {{ $q.dark.mode === 'auto' ? '跟随系统' : $q.dark.mode === true ? '已开启' : '已禁用' }}
+                {{ $q.dark.mode === 'auto' ? 'Follow System' : $q.dark.mode === true ? 'Enabled' : 'Disabled' }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -130,7 +130,7 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                设置
+                Settings
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -149,7 +149,7 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                管理面板
+                Admin Panel
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -168,7 +168,7 @@
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                登出
+                Logout
               </q-item-label>
               <q-item-label caption lines="2">{{ userName }}</q-item-label>
             </q-item-section>
@@ -181,12 +181,12 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="power_settings_new" color="primary" text-color="white" />
-          <span class="q-ml-sm">是否退出登录？（若未开启用户验证，则操作无效）</span>
+          <span class="q-ml-sm">Are you sure you want to log out?</span>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="取消" color="primary" v-close-popup />
-          <q-btn flat label="退出" color="primary" @click="logout()" v-close-popup />
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Log out" color="primary" @click="logout()" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -241,11 +241,11 @@ export default {
       randId: null,
       showTimer: false,
       links: [
-        { title: '媒体库', icon: 'widgets', path: '/' },
-        { title: '我的收藏', icon: 'favorite', path: '/favourites' },
-        { title: '社团', icon: 'group', path: '/circles' },
-        { title: '标签', icon: 'label', path: '/tags' },
-        { title: '声优', icon: 'mic', path: '/vas' }
+        { title: 'Library', icon: 'widgets', path: '/' },
+        { title: 'My Favourites', icon: 'favorite', path: '/favourites' },
+        { title: 'Circles', icon: 'group', path: '/circles' },
+        { title: 'Tags', icon: 'label', path: '/tags' },
+        { title: 'VAs', icon: 'mic', path: '/vas' }
       ],
       sharedConfig: {}
     };
@@ -329,15 +329,15 @@ export default {
         .then(res => {
           if (res.data.update_available && res.data.notifyUser) {
             this.$q.notify({
-              message: 'GitHub上有新版本',
+              message: 'A new version is available on GitHub (this links to a different fork)',
               color: 'primary',
               textColor: 'white',
               icon: 'cloud_download',
               timeout: 5000,
               actions: [
-                { label: '好', color: 'white' },
+                { label: 'OK', color: 'white' },
                 {
-                  label: '查看',
+                  label: 'View',
                   color: 'white',
                   handler: () => {
                     Object.assign(document.createElement('a'), {
@@ -356,8 +356,8 @@ export default {
               type: 'warning',
               timeout: 60000,
               actions: [
-                { label: '以后提醒我', color: 'black' },
-                { label: '前往扫描页', color: 'black', handler: () => this.$router.push('/admin/scanner') }
+                { label: 'Remind me later', color: 'black' },
+                { label: 'Open scanner page', color: 'black', handler: () => this.$router.push('/admin/scanner') }
               ]
             });
           }
@@ -437,13 +437,13 @@ export default {
     onAddSearchKeyword() {
       const keyword = this.editKeyword.trim();
       if (keyword === '') {
-        this.showErrNotif('无法添加空白的关键字');
+        this.showErrNotif('Cannot add blank keyword');
         return;
       }
 
       for (let kw of this.keywords) {
         if (kw === keyword) {
-          this.showErrNotif('关键字重复，添加失败');
+          this.showErrNotif('Duplicate keyword, failed to add');
           return;
         }
       }

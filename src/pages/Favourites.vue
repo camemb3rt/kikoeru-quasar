@@ -4,9 +4,9 @@
       <div class="col-lg-3 col-sm-12 col-xs-12">
         <q-btn-toggle v-model="mode" @input="changeMode" spread no-caps rounded toggle-color="primary" class="text-bold"
           :class="{ 'bg-black': $q.dark.isActive }" :options="[
-            { label: '我的评价', value: 'review' },
-            { label: '我的进度', value: 'progress' },
-            { label: '分类整理', value: 'folder' }
+            { label: 'Reviews', value: 'review' },
+            { label: 'Progress', value: 'progress' },
+            { label: 'Folder', value: 'folder' }
           ]" />
       </div>
       <div class="col-auto gt-sm row">
@@ -21,18 +21,18 @@
     <div class="q-pt-md q-px-sm">
       <q-btn-toggle v-if="mode === 'progress'" v-model="progressFilter" @input="changeProgressFilter"
         toggle-color="primary" rounded :class="{ 'bg-black': $q.dark.isActive }" :options="[
-          { label: '想听', value: 'marked' },
-          { label: '在听', value: 'listening' },
-          { label: '听过', value: 'listened' },
-          { label: '重听', value: 'replay' },
-          { label: '搁置', value: 'postponed' }
+          { label: 'Plan to Listen', value: 'marked' },
+          { label: 'Listening', value: 'listening' },
+          { label: 'Completed', value: 'listened' },
+          { label: 'Replaying', value: 'replay' },
+          { label: 'Postponed', value: 'postponed' }
         ]" />
     </div>
 
     <div class="q-pt-md">
       <div class="q-px-sm q-py-md">
         <q-infinite-scroll @load="onLoad" :offset="500" :disable="stopLoad" ref="scroll" v-if="mode !== 'folder'">
-          <div class="row justify-center text-grey" v-if="works.length === 0">在作品界面上点击星标、标记进度，标记的音声就会出现在这里啦</div>
+          <div class="row justify-center text-grey" v-if="works.length === 0">Rate or mark progress on a work to have it appear here</div>
           <q-list bordered separator class="shadow-2" v-if="works.length">
             <FavListItem v-for="work in works" :key="work.id" :workid="work.id" :metadata="work" @reset="reset()"
               :mode="mode"></FavListItem>
@@ -44,7 +44,7 @@
           </template>
         </q-infinite-scroll>
 
-        <div v-else class="row justify-center text-grey">尚未实现，敬请期待</div>
+        <div v-else class="row justify-center text-grey">This tab was meant to do something, but it was never implemented</div>
       </div>
     </div>
   </q-page>
@@ -93,36 +93,36 @@ export default {
       pagination: { currentPage: 0, pageSize: 12, totalCount: 0 },
       sortMode: 'desc',
       sortBy: {
-        label: '标记时间',
+        label: 'Favourited Time',
         order: 'updated_at'
       },
       sortOptions: [
         {
-          label: '标记时间',
+          label: 'Favourited Time',
           order: 'updated_at'
         },
         {
-          label: '评价',
+          label: 'Rating',
           order: 'userRating'
         },
         {
-          label: '发布时间',
+          label: 'Release Date',
           order: 'release'
         },
         {
-          label: '评论数量',
+          label: 'Review Count',
           order: 'review_count'
         },
         {
-          label: '售出数量',
+          label: 'Sales Count',
           order: 'dl_count'
         },
         {
-          label: '全年龄新作',
+          label: 'SFW',
           order: 'allage'
         },
         {
-          label: '18禁新作',
+          label: 'NSFW',
           order: 'nsfw'
         }
       ]

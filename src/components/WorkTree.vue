@@ -44,7 +44,7 @@
 
           <q-item-section>
             <q-item-label lines="2">{{ item.title }}</q-item-label>
-            <q-item-label v-if="item.children" caption lines="1">{{ `${item.children.length} 项目` }}</q-item-label>
+            <q-item-label v-if="item.children" caption lines="1">{{ `${item.children.length} items` }}</q-item-label>
 
             <!-- 媒体文件时长 -->
             <q-item-label
@@ -68,15 +68,15 @@
           >
             <q-list separator>
               <q-item clickable @click="addToQueue(item)" v-if="item.type === 'audio'">
-                <q-item-section>添加到播放列表</q-item-section>
+                <q-item-section>Add to playlist</q-item-section>
               </q-item>
 
               <q-item clickable @click="playNext(item)" v-if="item.type === 'audio'">
-                <q-item-section>下一曲播放</q-item-section>
+                <q-item-section>Play next</q-item-section>
               </q-item>
 
               <q-item clickable @click="download(item)">
-                <q-item-section>下载文件</q-item-section>
+                <q-item-section>Download file</q-item-section>
               </q-item>
             </q-list>
           </q-menu>

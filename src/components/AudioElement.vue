@@ -23,6 +23,7 @@
 import Lyric from 'lrc-file-parser'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import NotifyMixin from '../mixins/Notification.js'
+import { subtitleToLrc } from './subtitle'
 
 export default {
   name: 'AudioElement',
@@ -267,10 +268,14 @@ export default {
             // 有lrc歌词文件
             this.lrcAvailable = true;
             const lrcUrl = `/api/media/stream/${response.data.mediaPath}?token=${token}`;
+            const lyricExtension = (response.data.lyricExtension || '').toLowerCase();
             this.$axios.get(lrcUrl)
-              .then(response => {
+              .then(lyricResponse => {
                 console.log('LRC file loaded');
-                this.lrcObj.setLyric(response.data);
+                const lyricContent = ['.srt', '.vtt'].includes(lyricExtension)
+                  ? subtitleToLrc(lyricResponse.data)
+                  : lyricResponse.data;
+                this.lrcObj.setLyric(lyricContent);
                 this.lrcObj.play(this.player.currentTime * 1000);
               });
           } else {

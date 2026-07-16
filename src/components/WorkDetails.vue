@@ -1,10 +1,14 @@
 <template>
-  <div>
-    <router-link :to="`/work/RJ${metadata.id}`">
-      <CoverSFW :workid="metadata.id" :nsfw="false" :release="metadata.release" />
-    </router-link>
+  <div class="row q-ma-md">
+    <CoverSFW
+      class="col-12 col-md-4 q-pl-md-md q-pt-md-md content-center"
+      :workid="metadata.id"
+      :nsfw="false"
+      :release="metadata.release"
+      style="border-radius: 8px; overflow: hidden; max-width: 560px;"
+    />
 
-    <div class="q-pa-sm">
+    <div class="col-md-6 col-12 q-pa-sm">
       <div class="q-px-sm q-py-none">
         <!-- 标题 -->
         <div class="text-h6 text-weight-regular">
@@ -46,9 +50,9 @@
 
             <!-- 评价分布明细 -->
             <q-tooltip v-if="metadata.rate_count_detail" content-class="text-subtitle1">
-              <div>平均: {{ metadata.rate_average_2dp }}</div>
+              <div>Average: {{ metadata.rate_average_2dp }}</div>
               <div v-for="(rate, index) in sortedRatings" :key="index" class="row items-center">
-                <div class="col">{{ rate.review_point }}星</div>
+                <div class="col">{{ rate.review_point }}</div>
 
                 <!-- 评价占比 -->
                 <q-linear-progress
@@ -99,7 +103,7 @@
       <!-- 价格&售出数 -->
       <div class="q-pt-sm q-pb-none">
         <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span>
-        售出数:
+        Sales:
         {{ metadata.dl_count }}
       </div>
 
@@ -135,14 +139,14 @@
         </q-chip>
       </div>
 
-      <q-btn-dropdown dense class="q-mt-sm shadow-4 q-mx-xs q-pl-sm" color="cyan" label="标记进度">
+      <q-btn-dropdown dense class="q-mt-sm shadow-4 q-mx-xs q-pl-sm" color="cyan" label="Progress">
         <q-list>
           <q-item clickable @click="setProgress('marked')" class="q-pa-xs">
             <q-item-section avatar>
               <q-avatar icon="headset" v-show="progress === 'marked'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>想听</q-item-label>
+              <q-item-label>Plan to Listen</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -151,7 +155,7 @@
               <q-avatar icon="headset" v-show="progress === 'listening'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>在听</q-item-label>
+              <q-item-label>Listening</q-item-label>
             </q-item-section>
           </q-item>
           <q-item clickable @click="setProgress('listened')" class="q-pa-xs">
@@ -159,7 +163,7 @@
               <q-avatar icon="headset" v-show="progress === 'listened'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>听过</q-item-label>
+              <q-item-label>Completed</q-item-label>
             </q-item-section>
           </q-item>
           <q-item clickable @click="setProgress('replay')" class="q-pa-xs">
@@ -167,7 +171,7 @@
               <q-avatar icon="headset" v-show="progress === 'replay'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>重听</q-item-label>
+              <q-item-label>Replaying</q-item-label>
             </q-item-section>
           </q-item>
           <q-item clickable @click="setProgress('postponed')" class="q-pa-xs">
@@ -175,13 +179,13 @@
               <q-avatar icon="headset" v-show="progress === 'postponed'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>搁置</q-item-label>
+              <q-item-label>Postponed</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
       </q-btn-dropdown>
 
-      <q-btn dense @click="showReviewDialog = true" color="cyan q-mt-sm shadow-4 q-mx-xs q-px-sm" label="写评论" />
+      <q-btn dense @click="showReviewDialog = true" color="cyan q-mt-sm shadow-4 q-mx-xs q-px-sm" label="Write a review" />
 
       <WriteReview
         v-if="showReviewDialog"

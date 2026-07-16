@@ -2,22 +2,22 @@
   <div>
     <div class="row q-ma-sm">
       <div class="col-xs-6 col-sm-4 row q-pa-sm">
-        <q-btn class="col" color="teal" label="扫描本地音声库"
+        <q-btn class="col" color="teal" label="Scan local files"
           :disable="state === 'running' || !(loggedIn || $socket.connected)" @click="performScan()" />
       </div>
 
       <div class="col-xs-6 col-sm-4 row q-pa-sm">
-        <q-btn class="col" color="primary" label="刷新音声库信息"
+        <q-btn class="col" color="primary" label="Update audio information"
           :disable="state === 'running' || !(loggedIn || $socket.connected)" @click="performUpdate()" />
       </div>
 
       <div class="col-xs-6 col-sm-4 row q-pa-sm">
-        <q-btn class="col" color="amber" label="扫描本地文件变化"
+        <q-btn class="col" color="amber" label="Scan local file changes"
           :disable="state === 'running' || !(loggedIn || $socket.connected)" @click="performModify()" />
       </div>
 
       <div class="col-xs-12 col-sm-12 row q-pa-sm">
-        <q-btn class="col" color="negative" label="终止扫描进程"
+        <q-btn class="col" color="negative" label="Stop running scan"
           :disable="state !== 'running' || !(loggedIn || $socket.connected)" @click="killScanProceess()" />
       </div>
     </div>
@@ -50,10 +50,10 @@
     <q-card v-show="(tasks.length > 0) || (failedTasks.length > 0)" class="q-ma-md">
       <q-tabs v-model="tab" dense inline-label class="text-grey" active-color="white" active-bg-color="brown"
         indicator-color="yellow" align="justify" narrow-indicator>
-        <q-tab name="tasks" icon="hourglass_full" label="处理中">
+        <q-tab name="tasks" icon="hourglass_full" label="In Progress">
           <q-badge v-show="tasks.length > 0" color="primary" floating>{{ tasks.length }}</q-badge>
         </q-tab>
-        <q-tab name="failedTasks" icon="error_outline" label="处理失败">
+        <q-tab name="failedTasks" icon="error_outline" label="Failed">
           <q-badge v-show="failedTasks.length > 0" color="red" floating>{{ failedTasks.length }}</q-badge>
         </q-tab>
       </q-tabs>
@@ -220,11 +220,11 @@ export default {
     allLogs() {
       const resultLogs = this.results.map(res => {
         if (res.result === 'added') {
-          return { level: 'info', message: `[RJ${res.rjcode}] 添加成功! Added: ${res.count}` }
+          return { level: 'info', message: `[RJ${res.rjcode}] Added successfully! Added: ${res.count}` }
         } else if (res.result === 'updated') {
-          return { level: 'info', message: `[RJ${res.rjcode}] 更新成功! Updated: ${res.count}` }
+          return { level: 'info', message: `[RJ${res.rjcode}] Updated successful! Updated: ${res.count}` }
         } else {
-          return { level: 'error', message: `[RJ${res.rjcode}] 处理失败! Failed: ${res.count}` }
+          return { level: 'error', message: `[RJ${res.rjcode}] Processing failed! Failed: ${res.count}` }
         }
       })
       return this.mainLogs.concat(resultLogs)
@@ -234,7 +234,7 @@ export default {
   mounted() {
     this.$socket.emit('ON_SCANNER_PAGE')
     this.$socket.on('connect_error', () => {
-      this.showErrNotif('连接Socket失败')
+      this.showErrNotif('Socket connection failed')
     });
   },
 }

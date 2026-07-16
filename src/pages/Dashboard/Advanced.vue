@@ -2,29 +2,29 @@
   <q-form @submit="onSubmit">
     <q-card class="q-ma-md">
       <q-toolbar>
-        <q-toolbar-title>爬虫相关设置</q-toolbar-title>
+        <q-toolbar-title>Crawler settings</q-toolbar-title>
       </q-toolbar>
 
       <q-list>
         <q-item style="height: 70px;">
           <q-item-section>
-            <q-item-label>标签语言</q-item-label>
-            <q-item-label caption>从 DLSite 爬取的标签元数据的语言</q-item-label>
+            <q-item-label>Tag Language</q-item-label>
+            <q-item-label caption>The language of tag metadata from DLsite</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
             <div class="q-gutter-sm">
-              <q-radio dense v-model="config.tagLanguage" val="zh-cn" label="简" />
-              <q-radio dense v-model="config.tagLanguage" val="zh-tw" label="繁" />
-              <q-radio dense v-model="config.tagLanguage" val="ja-jp" label="日" />
+              <q-radio dense v-model="config.tagLanguage" val="ja-jp" label="Japanese" />
+              <q-radio dense v-model="config.tagLanguage" val="zh-cn" label="Chinese (Simplified)" />
+              <q-radio dense v-model="config.tagLanguage" val="zh-tw" label="Chinese (Traditional)" />
             </div>
           </q-item-section>
         </q-item>
 
         <q-item>
           <q-item-section>
-            <q-item-label>DLsite 超时时间</q-item-label>
-            <q-item-label caption>默认 10000 毫秒</q-item-label>
+            <q-item-label>DLsite timeout</q-item-label>
+            <q-item-label caption>Defaults is 10000 milliseconds</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -39,8 +39,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>HVDB 超时时间</q-item-label>
-            <q-item-label caption>默认 10000 毫秒</q-item-label>
+            <q-item-label>HVDB timeout</q-item-label>
+            <q-item-label caption>Defaults to 10000 milliseconds</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -55,8 +55,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>重新请求间隔时间</q-item-label>
-            <q-item-label caption>默认 2000 毫秒</q-item-label>
+            <q-item-label>Re-request interval</q-item-label>
+            <q-item-label caption>Defaults to 2000 milliseconds</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -71,8 +71,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>请求最大尝试次数</q-item-label>
-            <q-item-label caption>默认 5</q-item-label>
+            <q-item-label>Maximum request attempts</q-item-label>
+            <q-item-label caption>Defaults to 5</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -87,8 +87,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>爬虫并行任务数量</q-item-label>
-            <q-item-label caption>默认 16</q-item-label>
+            <q-item-label>Number of parallel crawler tasks</q-item-label>
+            <q-item-label caption>Defaults to 16</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -103,8 +103,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>HTTP 代理服务主机 IP</q-item-label>
-            <q-item-label caption>此项为空时默认为本机</q-item-label>
+            <q-item-label>HTTP proxy server host IP</q-item-label>
+            <q-item-label caption>If this is empty no proxy is used</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -118,8 +118,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>HTTP 代理服务端口号 </q-item-label>
-            <q-item-label caption>此项为 0 时默认不使用代理</q-item-label>
+            <q-item-label>HTTP proxy service port</q-item-label>
+            <q-item-label caption>When this option is set to 0 no proxy is used</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -136,14 +136,14 @@
 
     <q-card class="q-ma-md">
       <q-toolbar>
-        <q-toolbar-title>文件夹扫描相关设置</q-toolbar-title>
+        <q-toolbar-title>Folder scanning settings</q-toolbar-title>
       </q-toolbar>
 
       <q-list>
         <q-item style="height: 70px;">
           <q-item-section>
-            <q-item-label>最大递归扫描深度</q-item-label>
-            <q-item-label caption>默认 2</q-item-label>
+            <q-item-label>Maximum recursive scan depth</q-item-label>
+            <q-item-label caption>Defaults to 2</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -157,8 +157,8 @@
         </q-item>
         <q-item>
           <q-item-section>
-            <q-item-label>扫描时跳过清理音声库</q-item-label>
-            <q-item-label caption>是否跳过清理不存在的音声（不推荐，默认不跳过）</q-item-label>
+            <q-item-label>Skip cleaning library when scanning</q-item-label>
+            <q-item-label caption>Whether to skip cleaning non-existent sounds (not recommended, not skipped by default)</q-item-label>
           </q-item-section>
 
           <q-item-section side>
@@ -170,15 +170,15 @@
 
     <q-card class="q-ma-md">
       <q-toolbar>
-        <q-toolbar-title>Web 服务器相关设置</q-toolbar-title>
-        <div class="q-pr-xs">更改此设置需要重启程序</div>
+        <q-toolbar-title>Web server settings</q-toolbar-title>
+        <div class="q-pr-xs">Changing these settings requires restarting the program</div>
       </q-toolbar>
 
       <q-list>
         <q-item style="height: 70px;">
           <q-item-section>
-            <q-item-label>用户验证</q-item-label>
-            <q-item-label caption>是否启用用户验证（生产环境下无法修改此设置）</q-item-label>
+            <q-item-label>User Authentication</q-item-label>
+            <q-item-label caption>Whether to enable user authentication (this setting cannot be modified in a production environment)</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -188,8 +188,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>启用Gzip</q-item-label>
-            <q-item-label caption>对网络传输启用Gzip压缩</q-item-label>
+            <q-item-label>Enable Gzip</q-item-label>
+            <q-item-label caption>Enable Gzip compression for network transfers</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -199,8 +199,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>设置端口号</q-item-label>
-            <q-item-label caption>服务器监听端口号</q-item-label>
+            <q-item-label>Port number</q-item-label>
+            <q-item-label caption>Server listening port number</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -215,8 +215,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>屏蔽远程连接</q-item-label>
-            <q-item-label caption>只允许本地访问，默认为false。更改此设置需要重启程序</q-item-label>
+            <q-item-label>Block remote connections</q-item-label>
+            <q-item-label caption>Allow only local access. Defaults to false. Changing this setting requires restarting the program.</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -226,8 +226,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>token 过期时间</q-item-label>
-            <q-item-label caption>默认 2592000 秒</q-item-label>
+            <q-item-label>Token expiration time</q-item-label>
+            <q-item-label caption>Defaults to 2592000 seconds</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -244,14 +244,14 @@
 
     <q-card class="q-ma-md">
       <q-toolbar>
-        <q-toolbar-title>安全设置</q-toolbar-title>
+        <q-toolbar-title>Security settings</q-toolbar-title>
       </q-toolbar>
 
       <q-list>
         <q-item style="height: 70px;">
           <q-item-section>
-            <q-item-label>生产环境</q-item-label>
-            <q-item-label caption>此设置无法在网页端修改，详情请查阅GitHub Wiki中关于配置文件的说明</q-item-label>
+            <q-item-label>Production environment</q-item-label>
+            <q-item-label caption>This setting cannot be modified on the web page. For more information, please refer to the configuration file description in the GitHub Wiki.</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -263,14 +263,14 @@
 
     <q-card class="q-ma-md">
       <q-toolbar>
-        <q-toolbar-title>其它设置</q-toolbar-title>
+        <q-toolbar-title>Other settings</q-toolbar-title>
       </q-toolbar>
 
       <q-list>
         <q-item style="height: 70px;">
           <q-item-section>
-            <q-item-label>检查更新</q-item-label>
-            <q-item-label caption>打开网页时是否检查更新</q-item-label>
+            <q-item-label>Check for updates</q-item-label>
+            <q-item-label caption>Check for updates when opening a page</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -280,8 +280,8 @@
 
         <q-item v-if="config.checkUpdate">
           <q-item-section>
-            <q-item-label>检查测试版更新</q-item-label>
-            <q-item-label caption>是否检查测试版更新</q-item-label>
+            <q-item-label>Check for beta updates</q-item-label>
+            <q-item-label caption>Check for beta updates</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -291,8 +291,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>数据库使用默认路径</q-item-label>
-            <q-item-label caption>使用程序所在位置下的sqlite文件夹，并忽略databaseFolderDir设置（如无必要请勿修改，更改此设置需要重启程序）</q-item-label>
+            <q-item-label>Use default path for database</q-item-label>
+            <q-item-label caption>Use the sqlite folder under the program's location and ignore the databaseFolderDir setting (do not modify this unless necessary; changing this setting requires restarting the program)</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -302,8 +302,8 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label>封面使用默认路径</q-item-label>
-            <q-item-label caption>使用程序所在位置下的covers文件夹，并忽略封面文件夹路径设置</q-item-label>
+            <q-item-label>Use default path for covers</q-item-label>
+            <q-item-label caption>Use the covers folder under the program location and ignore the cover folder path setting</q-item-label>
           </q-item-section>
 
           <q-item-section avatar>
@@ -314,7 +314,7 @@
     </q-card>
 
     <div class="q-ma-lg row justify-end">
-      <q-btn :loading="loading" label="保存" type="submit" color="primary" />
+      <q-btn :loading="loading" label="Confirm" type="submit" color="primary" />
     </div>
   </q-form>
 </template>

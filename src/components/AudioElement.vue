@@ -23,7 +23,33 @@
 import Lyric from 'lrc-file-parser'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import NotifyMixin from '../mixins/Notification.js'
-import { subtitleToLrc } from './subtitle'
+
+function subtitleToLrc(content) {
+  const cueStartPattern = /^(?:(\d{1,2}):)?(\d{2}):(\d{2})[.,](\d{1,3})\s*-->/;
+  const lines = String(content || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n');
+  const lyricLines = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = lines[index].trim().match(cueStartPattern);
+    if (!match) continue;
+
+    const textLines = [];
+    index += 1;
+    while (index < lines.length && lines[index].trim() !== '') {
+      textLines.push(lines[index].trim());
+      index += 1;
+    }
+
+    const text = textLines.join(' ');
+    if (text) {
+      const totalMinutes = Number(match[1] || 0) * 60 + Number(match[2]);
+      const milliseconds = String(match[4]).padEnd(3, '0').slice(0, 3);
+      lyricLines.push(`[${String(totalMinutes).padStart(2, '0')}:${match[3]}.${milliseconds}] ${text}`);
+    }
+  }
+
+  return lyricLines.join('\n');
+}
 
 export default {
   name: 'AudioElement',

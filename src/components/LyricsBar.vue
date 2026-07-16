@@ -6,16 +6,29 @@
       @touchstart="onCursorDown"
       @touchend="onCursorUp"
     >
-        <div id="lyricsBar" class="text-center text-h6 text-bold ellipsis-2-lines text-purple q-mb-md absolute-bottom">
+        <div id="lyricsBar" class="text-center text-bold ellipsis-2-lines q-mb-md absolute-bottom" :style="lyricStyle">
             <span id="lyric">
               {{currentLyric}}
             </span>
+            <q-slider
+              v-model="lyricFontSize"
+              class="q-px-md q-mt-xs"
+              :min="12"
+              :max="56"
+              :step="1"
+              :label="true"
+              :label-value="`${lyricFontSize}px`"
+              color="purple"
+              @input="setLyricFontSize"
+              @mousedown.stop
+              @touchstart.stop
+            />
         </div>
     </q-card>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 const onCursorMove = (that) => (ev) => {
   if (!that.beTouched) { return }
@@ -37,11 +50,19 @@ export default {
 
   computed: {
     ...mapState('AudioPlayer', [
-      'currentLyric'
+      'currentLyric',
+      'lyricFontColor'
     ]),
 
     draggable() {
       return document.getElementById('draggable')
+    },
+
+    lyricStyle() {
+      return {
+        color: this.lyricFontColor,
+        fontSize: `${this.lyricFontSize}px`
+      }
     }
   },
 
@@ -51,11 +72,14 @@ export default {
 
       // 鼠标按下时的位置
       startX: 0,
-      startY: 0
+      startY: 0,
+      lyricFontSize: 20
     }
   },
 
   methods: {
+    ...mapMutations('AudioPlayer', ['SET_LYRIC_FONT_SIZE', 'SET_LYRIC_FONT_COLOR']),
+
     /**
      * @param {TouchEvent|MouseEvent} ev
      */
@@ -76,10 +100,22 @@ export default {
     onCursorUp(ev) {
       ev.preventDefault()
       this.beTouched = false
+    },
+
+    setLyricFontSize(size) {
+      this.SET_LYRIC_FONT_SIZE(size)
+      this.$q.localStorage.set('lyricFontSize', size)
     }
   },
 
   mounted() {
+    if (this.$q.localStorage.has('lyricFontSize')) {
+      this.lyricFontSize = this.$q.localStorage.getItem('lyricFontSize')
+      this.SET_LYRIC_FONT_SIZE(this.lyricFontSize)
+    }
+    if (this.$q.localStorage.has('lyricFontColor')) {
+      this.SET_LYRIC_FONT_COLOR(this.$q.localStorage.getItem('lyricFontColor'))
+    }
     addEventListener('mousemove', onCursorMove(this), false)
     addEventListener('touchmove', onCursorMove(this), false)
   }

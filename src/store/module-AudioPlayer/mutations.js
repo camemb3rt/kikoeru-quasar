@@ -127,6 +127,12 @@ const mutations = {
   SET_CURRENT_LYRIC: (state, line) => {
     state.currentLyric = line
   },
+  SET_LYRIC_FONT_SIZE: (state, size) => {
+    state.lyricFontSize = size
+  },
+  SET_LYRIC_FONT_COLOR: (state, color) => {
+    state.lyricFontColor = color
+  },
   SET_SLEEP_TIMER: (state, time) => {
     state.sleepTime = time
     state.sleepMode = true

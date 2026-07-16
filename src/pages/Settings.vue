@@ -67,6 +67,18 @@
             <q-toggle borderless v-model="isViewer" @input="setIsViewer" />
           </q-item-section>
         </q-item>
+        <q-item>
+          <q-item-section avatar>
+            <q-icon flat dense size="md" name="format_color_text" />
+          </q-item-section>
+          <q-item-section main>
+            <q-item-label>Lyric font color</q-item-label>
+            <q-item-label class="text-caption text-grey">Changes the color of the draggable lyric overlay</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <input v-model="lyricFontColor" type="color" aria-label="Lyric font color" @input="setLyricFontColor">
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-card>
 
@@ -97,7 +109,8 @@ export default {
         { label: '30 seconds', value: 30 }
       ],
       // 媒体查看器是否启用
-      isViewer: true
+      isViewer: true,
+      lyricFontColor: '#9c27b0'
     };
   },
 
@@ -118,10 +131,14 @@ export default {
     if (this.$q.localStorage.has('isViewer')) {
       this.isViewer = this.$q.localStorage.getItem('isViewer');
     }
+    if (this.$q.localStorage.has('lyricFontColor')) {
+      this.lyricFontColor = this.$q.localStorage.getItem('lyricFontColor');
+      this.SET_LYRIC_FONT_COLOR(this.lyricFontColor);
+    }
   },
 
   methods: {
-    ...mapMutations('AudioPlayer', ['SET_REWIND_SEEK_TIME', 'SET_FORWARD_SEEK_TIME']),
+    ...mapMutations('AudioPlayer', ['SET_REWIND_SEEK_TIME', 'SET_FORWARD_SEEK_TIME', 'SET_LYRIC_FONT_COLOR']),
 
     setPageSize() {
       console.log('set pageSize:', this.pageSize);
@@ -147,6 +164,11 @@ export default {
       console.log('set Media Viewer:', newIsViewer);
       this.isViewer = newIsViewer;
       this.$q.localStorage.set('isViewer', this.isViewer);
+    },
+
+    setLyricFontColor() {
+      this.SET_LYRIC_FONT_COLOR(this.lyricFontColor);
+      this.$q.localStorage.set('lyricFontColor', this.lyricFontColor);
     }
   }
 };

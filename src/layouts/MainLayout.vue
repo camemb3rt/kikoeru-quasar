@@ -80,14 +80,14 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple exact active-class="text-deep-purple text-weight-medium" @click="randomPlay">
+          <q-item clickable v-ripple exact active-class="text-deep-purple text-weight-medium" @click="openRandomWork">
             <q-item-section avatar>
               <q-icon name="shuffle" />
             </q-item-section>
 
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                Random Play
+                Random Work
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -239,7 +239,7 @@ export default {
       drawerOpen: false,
       miniState: true,
       confirm: false,
-      randId: null,
+      randomWorkHistory: [],
       showTimer: false,
       links: [
         { title: 'Library', icon: 'widgets', path: '/' },
@@ -253,10 +253,6 @@ export default {
   },
 
   watch: {
-    randId() {
-      this.$router.push(`/work/RJ${this.randId}`);
-    },
-
     '$route.query': {
       handler: function(query) {
         const keyword = query.keyword ? query.keyword : '';
@@ -268,6 +264,7 @@ export default {
   },
 
   mounted() {
+    this.randomWorkHistory = this.$q.sessionStorage.getItem('random-work-history') || [];
     this.initKeyword();
     this.initUser();
     this.checkUpdate();
@@ -393,19 +390,27 @@ export default {
         });
     },
 
-    randomPlay() {
+    openRandomWork() {
       this.requestRandomWork();
     },
 
     requestRandomWork() {
       const params = {
-        order: 'betterRandom'
+        order: 'betterRandom',
+        excludeIds: this.randomWorkHistory.join(',')
       };
       this.$axios
         .get('/api/works', { params })
         .then(response => {
           const works = response.data.works;
-          this.randId = works.length ? works[0].id : null;
+          if (works.length) {
+            const id = String(works[0].id);
+            this.randomWorkHistory = [id, ...this.randomWorkHistory.filter(historyId => historyId !== id)].slice(0, 3);
+            this.$q.sessionStorage.set('random-work-history', this.randomWorkHistory);
+            this.$router.push(`/work/RJ${id}`);
+          } else {
+            this.showWarnNotif('No works are available to choose from.');
+          }
         })
         .catch(error => {
           if (error.response) {

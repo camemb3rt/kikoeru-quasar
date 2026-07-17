@@ -83,8 +83,13 @@ const routes = [
       },
       ...prefixRoutes('favourites', [
         {
-          path: '',
-          props: { route: 'review'},
+        path: '',
+        props: { route: 'favorite'},
+          component: Favourites,
+        },
+        {
+          path: '/favorite',
+          props: { route: 'favorite'},
           component: Favourites,
         },
         {
@@ -124,11 +129,6 @@ const routes = [
             component: Favourites,
           },
         ]),
-        {
-          path: '/folder',
-          props: { route: 'folder'},
-          component: Favourites,
-        },
       ]),
     ],
     meta: {

@@ -58,8 +58,13 @@ const onCursorMove = (that) => (ev) => {
 
   // 计算 element 新位置坐标
   const rect = that.draggable.getBoundingClientRect()
-  const eleX = touch.clientX - that.startX + rect.width / 2
-  const eleY = touch.clientY - that.startY
+  const requestedX = touch.clientX - that.startX + rect.width / 2
+  const requestedY = touch.clientY - that.startY
+  const minX = rect.width / 2
+  const maxX = Math.max(minX, window.innerWidth - rect.width / 2)
+  const maxY = Math.max(0, window.innerHeight - rect.height)
+  const eleX = Math.min(Math.max(requestedX, minX), maxX)
+  const eleY = Math.min(Math.max(requestedY, 0), maxY)
 
   that.draggable.style.left = eleX + 'px'
   that.draggable.style.top = eleY + 'px'
@@ -128,9 +133,15 @@ export default {
     },
 
     onCursorUp(ev) {
-      ev.preventDefault()
+      if (ev) ev.preventDefault()
+      if (!this.beTouched) return
       this.beTouched = false
       setTimeout(() => this.hideSizeSlider(), 300)
+    },
+
+    onGlobalCursorUp() {
+      this.onCursorUp()
+      this.onSizeSliderUp()
     },
 
     showSizeSlider() {
@@ -166,8 +177,14 @@ export default {
       this.$nextTick(() => {
         const position = this.savedLyricBarPosition
         const rect = this.draggable.getBoundingClientRect()
-        const left = position.centered ? position.left : position.left + rect.width / 2
-        const top = Number.isFinite(position.top) ? position.top : rect.top
+        const savedLeft = Number.isFinite(position.left) ? position.left : window.innerWidth / 2
+        const requestedLeft = position.centered ? savedLeft : savedLeft + rect.width / 2
+        const requestedTop = Number.isFinite(position.top) ? position.top : rect.top
+        const minLeft = rect.width / 2
+        const maxLeft = Math.max(minLeft, window.innerWidth - rect.width / 2)
+        const maxTop = Math.max(0, window.innerHeight - rect.height)
+        const left = Math.min(Math.max(requestedLeft, minLeft), maxLeft)
+        const top = Math.min(Math.max(requestedTop, 0), maxTop)
 
         this.draggable.style.left = left + 'px'
         this.draggable.style.top = top + 'px'
@@ -199,13 +216,13 @@ export default {
     }
     addEventListener('mousemove', onCursorMove(this), false)
     addEventListener('touchmove', onCursorMove(this), false)
-    addEventListener('mouseup', this.onSizeSliderUp, false)
-    addEventListener('touchend', this.onSizeSliderUp, false)
+    addEventListener('mouseup', this.onGlobalCursorUp, false)
+    addEventListener('touchend', this.onGlobalCursorUp, false)
   },
 
   beforeDestroy() {
-    removeEventListener('mouseup', this.onSizeSliderUp, false)
-    removeEventListener('touchend', this.onSizeSliderUp, false)
+    removeEventListener('mouseup', this.onGlobalCursorUp, false)
+    removeEventListener('touchend', this.onGlobalCursorUp, false)
   }
 }
 </script>
@@ -223,10 +240,10 @@ export default {
     max-width: 100vw;
     overflow: visible;
     padding: 12px;
-    position: absolute;
+    position: fixed;
     text-align: center;
     transform: translateX(-50%);
-    z-index: 2;
+    z-index: 3001;
   }
 
   #lyricsBar {

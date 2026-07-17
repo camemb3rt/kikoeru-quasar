@@ -205,9 +205,10 @@
     </q-page-container>
 
     <q-footer class="q-pa-none">
-      <LyricsBar />
       <PlayerBar />
     </q-footer>
+
+    <LyricsBar />
   </q-layout>
 </template>
 

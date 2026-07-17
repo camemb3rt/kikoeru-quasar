@@ -9,6 +9,7 @@
       @mouseup="onCursorUp"
       @touchstart="onCursorDown"
       @touchend="onCursorUp"
+      @wheel.prevent="adjustLyricFontSize"
     >
         <div
           id="lyricsBar"
@@ -56,13 +57,14 @@ const onCursorMove = (that) => (ev) => {
   const touch = that.getTouch(ev)
 
   // 计算 element 新位置坐标
-  const eleX = touch.clientX - that.startX
+  const rect = that.draggable.getBoundingClientRect()
+  const eleX = touch.clientX - that.startX + rect.width / 2
   const eleY = touch.clientY - that.startY
 
   that.draggable.style.left = eleX + 'px'
   that.draggable.style.top = eleY + 'px'
   that.draggable.style.bottom = 'auto'
-  that.$q.localStorage.set('lyricBarPosition', { left: eleX, top: eleY })
+  that.$q.localStorage.set('lyricBarPosition', { left: eleX, top: eleY, centered: true })
   that.showSizeSlider()
 
 }
@@ -92,6 +94,7 @@ export default {
   data () {
     return {
       beTouched: false,
+      savedLyricBarPosition: null,
       sizeSliderInteracting: false,
       sizeSliderVisible: false,
 
@@ -119,8 +122,9 @@ export default {
 
       // 移动端使用 ev.touches[0]
       const touch = this.getTouch(ev)
-      this.startX = touch.clientX - this.draggable.offsetLeft
-      this.startY = touch.clientY - this.draggable.offsetTop
+      const rect = this.draggable.getBoundingClientRect()
+      this.startX = touch.clientX - rect.left
+      this.startY = touch.clientY - rect.top
     },
 
     onCursorUp(ev) {
@@ -156,19 +160,36 @@ export default {
       this.setLyricFontSize(size)
     },
 
+    applySavedPosition() {
+      if (!this.savedLyricBarPosition) return
+
+      this.$nextTick(() => {
+        const position = this.savedLyricBarPosition
+        const rect = this.draggable.getBoundingClientRect()
+        const left = position.centered ? position.left : position.left + rect.width / 2
+        const top = Number.isFinite(position.top) ? position.top : rect.top
+
+        this.draggable.style.left = left + 'px'
+        this.draggable.style.top = top + 'px'
+        this.draggable.style.bottom = 'auto'
+      })
+    },
+
     setLyricFontSize(size) {
       this.SET_LYRIC_FONT_SIZE(size)
       this.$q.localStorage.set('lyricFontSize', size)
     }
   },
 
-  mounted() {
-    const lyricBarPosition = this.$q.localStorage.getItem('lyricBarPosition')
-    if (lyricBarPosition && Number.isFinite(lyricBarPosition.left) && Number.isFinite(lyricBarPosition.top)) {
-      this.draggable.style.left = lyricBarPosition.left + 'px'
-      this.draggable.style.top = lyricBarPosition.top + 'px'
-      this.draggable.style.bottom = 'auto'
+  watch: {
+    lyricAvailable(available) {
+      if (available) this.applySavedPosition()
     }
+  },
+
+  mounted() {
+    this.savedLyricBarPosition = this.$q.localStorage.getItem('lyricBarPosition')
+    if (this.lyricAvailable) this.applySavedPosition()
     if (this.$q.localStorage.has('lyricFontSize')) {
       this.lyricFontSize = this.$q.localStorage.getItem('lyricFontSize')
       this.SET_LYRIC_FONT_SIZE(this.lyricFontSize)
@@ -198,12 +219,13 @@ export default {
     bottom: 48px;
     box-shadow: none;
     display: inline-block;
-    left: 0;
+    left: 50%;
     max-width: 100vw;
     overflow: visible;
     padding: 12px;
     position: absolute;
     text-align: center;
+    transform: translateX(-50%);
     z-index: 2;
   }
 

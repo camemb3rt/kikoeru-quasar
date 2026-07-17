@@ -212,6 +212,7 @@ export default {
     max-width: 100%;
     min-width: 1vw;
     position: relative;
+    text-align: center;
   }
 
   #lyricsSizeControl {
@@ -224,5 +225,6 @@ export default {
     border-radius: 0.5rem;
     display: inline-block;
     padding: 0.25rem 0.75rem;
+    text-align: center;
   }
 </style>

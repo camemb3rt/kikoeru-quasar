@@ -1,56 +1,39 @@
-# Kikoeru (kikoeru-quasar)
+# Kikoeru Quasar
 
-用于收听 DLsite 音色作品的本地网络媒体播放器。
+The Vue 2 / Quasar 1 frontend for the self-hosted Kikoeru audio-work library. It is designed to run with the [kikoeru-express](https://github.com/camemb3rt/kikoeru-express) backend.
 
-[![unstable build status](https://github.com/umonaca/kikoeru-quasar/actions/workflows/build-and-publish.yml/badge.svg)](https://github.com/umonaca/kikoeru-quasar/actions)
+## Highlights in this fork
 
-## 前言
+- `.lrc`, WebVTT (`.vtt`), and SubRip (`.srt`) lyric/subtitle playback.
+- A draggable, resizable subtitle overlay with remembered browser position, font sizing, and colour controls.
+- English metadata controls and an English UI pass for visible scanner messages.
+- Per-work metadata refresh with confirmation, persistent live logs, cover refresh, and translated-work cover support.
+- Random Work navigation that avoids the last three selections.
+- Refined Tags, Voice Actors, and Circles browsing.
+- Listening progress, reviews, ratings, and persistent favourites.
 
-本项目是基于以下大佬的开源代码进行二次开发，用于管理本地音色文件夹。在这里特此感谢大佬们用爱发电，并且欢迎各位一起交流学习（本人前端小白）。
+## Local development
 
-- [**umonaca**](https://github.com/umonaca/kikoeru-express)
-- [**number178**](https://https://github.com/Number178/kikoeru-express)
-
-外观设计参考某个**asmr**站长，感谢站长多年以来的无私奉献！
-
-## 安装依赖
-
-请先安装全局依赖的quasar，本项目使用的是基于vue 2.x的quasar 1.x-2.0版本。
-
-安装完成后请使用 `quasar -v` 测试是否输出quasar版本以检测安装是否成功
+Requirements: Node.js 20 or newer for the project tooling, and a running backend at `http://localhost:5232`.
 
 ```bash
-npm i -g @quasar/cli@2.0.0
-# 安装项目依赖（请在本文件夹下运行！）
-npm install
+npm ci
+./node_modules/.bin/quasar dev --port 5233
 ```
 
-### 开发者模式启动
+Open `http://localhost:5233`. The development server proxies API and Socket.IO requests to the backend.
 
-该模式下每次修改代码都会重新加载、实时报错等。
+## Production build
 
 ```bash
-quasar dev
+./node_modules/.bin/quasar build
+./node_modules/.bin/quasar build -m pwa
 ```
 
-使用该模式请同时启动后端并且在浏览器输入`http://<ip>:8080`进入页面，从而达到前后端联调。
+The backend Docker build can build this project directly through its named `frontend` build context. See the backend README for the full Docker command.
 
-### 正式构建模式
+If you build this frontend Dockerfile as a separate Nginx container, Nginx continues to listen on its standard internal port `80`; publish it as `-p 5233:80` to make it available at `http://localhost:5233`.
 
-- SPA模式构建：
+## License
 
-    ```bash
-    quasar build
-    ```
-
-- PWA模式构建：
-
-    ```bash
-    quasar build -m pwa
-    ```
-
-构建完成后会输出`dist/`文件夹，请将里面`spa`或`pwa`的文件全部复制到[kikoeru-express](https://github.com/MirrichWangD/kikoeru-express)项目的`dist/`文件夹下，启动项目后可以直接通过`http://<ip>:8888`（默认8888端口）浏览网站。
-
-### 自定义配置
-
-查看文档：[Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+GNU General Public License v3.0.

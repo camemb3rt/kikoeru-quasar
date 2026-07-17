@@ -1,12 +1,9 @@
 <template>
   <div class="row q-ma-md">
-    <CoverSFW
-      class="col-12 col-md-4 q-pl-md-md q-pt-md-md content-center"
-      :workid="metadata.id"
-      :nsfw="false"
-      :release="metadata.release"
-      style="border-radius: 8px; overflow: hidden; max-width: 560px;"
-    />
+    <div class="cover-favorite-wrapper col-12 col-md-4 q-pl-md-md q-pt-md-md content-center">
+      <CoverSFW :workid="metadata.id" :nsfw="false" :release="metadata.release" :refresh-key="coverRefreshKey" style="border-radius: 8px; overflow: hidden; max-width: 560px;" />
+      <q-btn round dense class="cover-favorite-button" :icon="favorite ? 'favorite' : 'favorite_border'" :color="favorite ? 'red' : 'grey-6'" @click.stop.prevent="toggleFavorite" />
+    </div>
 
     <div class="col-md-6 col-12 q-pa-sm">
       <div class="q-px-sm q-py-none">
@@ -186,6 +183,49 @@
       </q-btn-dropdown>
 
       <q-btn dense @click="showReviewDialog = true" color="cyan q-mt-sm shadow-4 q-mx-xs q-px-sm" label="Write a review" />
+      <q-btn
+        v-if="isAdmin"
+        dense
+        :loading="refreshingMetadata"
+        @click="requestMetadataRefresh"
+        color="cyan"
+        class="q-mt-sm shadow-4 q-mx-xs q-px-sm"
+        label="Refresh metadata"
+      />
+
+      <q-dialog v-model="showMetadataRefreshConfirmation" persistent>
+        <q-card style="max-width: 420px; width: calc(100vw - 32px);">
+          <q-card-section class="row items-center q-pb-none">
+            <q-icon name="warning" color="warning" size="sm" class="q-mr-sm" />
+            <div class="text-h6">Refresh this work's metadata?</div>
+          </q-card-section>
+          <q-card-section>
+            This will replace the current title, tags, artists, and other scraped metadata with the latest available information.
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="grey-7" v-close-popup />
+            <q-btn flat label="Refresh metadata" color="cyan" @click="confirmMetadataRefresh" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <q-card
+        v-if="refreshNotificationVisible"
+        class="metadata-refresh-notification text-white shadow-8"
+        :class="refreshNotificationStatus === 'error' ? 'bg-negative' : 'bg-positive'"
+      >
+        <q-card-section class="row items-center q-px-sm q-py-xs">
+          <q-icon :name="refreshNotificationStatus === 'running' ? 'sync' : refreshNotificationStatus === 'error' ? 'bug_report' : 'done'" class="q-mr-sm" />
+          <div class="col text-weight-medium">Metadata refresh · RJ{{ metadata.id }}</div>
+          <q-btn flat round dense icon="close" size="sm" @click="closeRefreshNotification" />
+        </q-card-section>
+        <q-separator dark />
+        <div class="metadata-refresh-log q-px-sm q-py-xs">
+          <div v-for="(log, index) in refreshLogs" :key="index" :class="log.level === 'error' ? 'text-white' : ''">
+            {{ log.message }}
+          </div>
+        </div>
+      </q-card>
 
       <WriteReview
         v-if="showReviewDialog"
@@ -225,7 +265,15 @@ export default {
       userMarked: false,
       progress: '',
       showReviewDialog: false,
-      showTags: true
+      showTags: true,
+      refreshingMetadata: false,
+      showMetadataRefreshConfirmation: false,
+      refreshNotificationVisible: false,
+      refreshNotificationStatus: 'running',
+      refreshLogs: [],
+      waitingForMetadataSocket: false,
+      coverRefreshKey: 0,
+      favorite: false
     };
   },
 
@@ -235,7 +283,52 @@ export default {
         return a.review_point > b.review_point ? -1 : 1;
       }
       return this.metadata.rate_count_detail.slice().sort(compare);
+    },
+    isAdmin() {
+      return this.$store.state.User.name === 'admin';
     }
+  },
+
+  sockets: {
+    success() {
+      if (this.waitingForMetadataSocket) {
+        this.waitingForMetadataSocket = false;
+        this.startMetadataRefresh();
+      }
+    },
+    connect_error() {
+      if (this.waitingForMetadataSocket) {
+        this.waitingForMetadataSocket = false;
+        this.showErrNotif('Could not connect to the metadata refresh service.');
+      }
+    },
+    SCAN_TASKS(payload) {
+      if (!this.refreshNotificationVisible) return;
+      const task = payload.tasks.find(item => String(item.rjcode) === String(this.metadata.id));
+      if (task) {
+        this.refreshLogs = task.logs;
+      }
+    },
+    SCAN_FINISHED() {
+      if (!this.refreshingMetadata) return;
+      this.refreshingMetadata = false;
+      this.refreshNotificationStatus = 'success';
+      this.appendRefreshLog('Metadata refreshed successfully.');
+      this.coverRefreshKey += 1;
+      this.$emit('reset');
+    },
+    SCAN_ERROR() {
+      if (!this.refreshingMetadata) return;
+      this.refreshingMetadata = false;
+      this.refreshNotificationStatus = 'error';
+      this.appendRefreshLog('Metadata refresh failed.', 'error');
+    },
+    WORK_UPDATE_REJECTED(payload) {
+      if (!this.refreshingMetadata) return;
+      this.refreshingMetadata = false;
+      this.refreshNotificationStatus = 'error';
+      this.appendRefreshLog(payload.message, 'error');
+    },
   },
 
   watch: {
@@ -249,6 +342,7 @@ export default {
         this.rating = newMetaData.rate_average_2dp || 0;
       }
       this.progress = newMetaData.progress;
+      this.favorite = Boolean(newMetaData.favorite);
 
       // 极个别作品没有标签
       if (newMetaData.tags && newMetaData.tags[0].name === null) {
@@ -258,6 +352,58 @@ export default {
   },
 
   methods: {
+    requestMetadataRefresh() {
+      if (!this.refreshingMetadata) {
+        this.showMetadataRefreshConfirmation = true;
+      }
+    },
+
+    confirmMetadataRefresh() {
+      this.showMetadataRefreshConfirmation = false;
+      this.refreshWorkMetadata();
+    },
+
+    refreshWorkMetadata() {
+      if (this.refreshingMetadata) return;
+
+      if (this.$socket.connected) {
+        this.startMetadataRefresh();
+        return;
+      }
+
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
+      this.$socket.io.opts.query.auth_token = token;
+      this.waitingForMetadataSocket = true;
+      this.$socket.open();
+    },
+
+    startMetadataRefresh() {
+      this.refreshingMetadata = true;
+      this.refreshNotificationVisible = true;
+      this.refreshNotificationStatus = 'running';
+      this.refreshLogs = [{ level: 'info', message: 'Starting metadata refresh...' }];
+      this.$socket.emit('PERFORM_WORK_UPDATE', String(this.metadata.id));
+    },
+
+    closeRefreshNotification() {
+      this.refreshNotificationVisible = false;
+    },
+
+    appendRefreshLog(message, level = 'info') {
+      this.refreshLogs.push({ level, message });
+    },
+
+    toggleFavorite() {
+      const favorite = !this.favorite;
+      this.favorite = favorite;
+      this.$axios.put('/api/review/favorite', { work_id: this.metadata.id, favorite })
+        .then(response => this.showSuccNotif(response.data.message))
+        .catch(error => {
+          this.favorite = !favorite;
+          this.showErrNotif(error.response ? error.response.data.error : error.message);
+        });
+    },
+
     setProgress(newProgress) {
       this.progress = newProgress;
       const submitPayload = {
@@ -337,6 +483,40 @@ export default {
 };
 </script>
 <style scoped>
+.metadata-refresh-notification {
+  bottom: 18px;
+  max-width: calc(100vw - 36px);
+  position: fixed;
+  right: 18px;
+  width: 380px;
+  z-index: 4000;
+}
+
+.metadata-refresh-log {
+  font-family: monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  max-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.cover-favorite-wrapper {
+  position: relative;
+}
+
+.cover-favorite-button {
+  opacity: 0;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  transition: opacity 160ms ease;
+  z-index: 2;
+}
+
+.cover-favorite-wrapper:hover .cover-favorite-button {
+  opacity: 1;
+}
 /* optional: 添加一些样式，让它看起来更像按钮 */
 .q-chip {
   cursor: pointer; /* 确保有点击效果 */

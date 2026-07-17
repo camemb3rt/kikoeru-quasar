@@ -39,6 +39,11 @@ export default {
 
     release: {
       required: true
+    },
+
+    refreshKey: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -50,7 +55,7 @@ export default {
 
   computed: {
     coverUrl() {
-      return this.workid ? `/api/cover/${this.workid}` : '';
+      return this.workid ? `/api/cover/${this.workid}?refresh=${this.refreshKey}` : '';
     },
 
     imgClass() {

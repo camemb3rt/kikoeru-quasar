@@ -4,9 +4,9 @@
       <div class="col-lg-3 col-sm-12 col-xs-12">
         <q-btn-toggle v-model="mode" @input="changeMode" spread no-caps rounded toggle-color="primary" class="text-bold"
           :class="{ 'bg-black': $q.dark.isActive }" :options="[
+            { label: 'Favourites', value: 'favorite' },
             { label: 'Reviews', value: 'review' },
-            { label: 'Progress', value: 'progress' },
-            { label: 'Folder', value: 'folder' }
+            { label: 'Progress', value: 'progress' }
           ]" />
       </div>
       <div class="col-auto gt-sm row">
@@ -31,8 +31,8 @@
 
     <div class="q-pt-md">
       <div class="q-px-sm q-py-md">
-        <q-infinite-scroll @load="onLoad" :offset="500" :disable="stopLoad" ref="scroll" v-if="mode !== 'folder'">
-          <div class="row justify-center text-grey" v-if="works.length === 0">Rate or mark progress on a work to have it appear here</div>
+        <q-infinite-scroll @load="onLoad" :offset="500" :disable="stopLoad" ref="scroll">
+          <div class="row justify-center text-grey" v-if="works.length === 0">{{ mode === 'favorite' ? 'Heart works to add them to your favourites.' : 'Rate or mark progress on a work to have it appear here' }}</div>
           <q-list bordered separator class="shadow-2" v-if="works.length">
             <FavListItem v-for="work in works" :key="work.id" :workid="work.id" :metadata="work" @reset="reset()"
               :mode="mode"></FavListItem>
@@ -43,8 +43,6 @@
             </div>
           </template>
         </q-infinite-scroll>
-
-        <div v-else class="row justify-center text-grey">This tab was meant to do something, but it was never implemented</div>
       </div>
     </div>
   </q-page>
@@ -66,7 +64,7 @@ export default {
   props: {
     route: {
       type: String,
-      default: 'review'
+      default: 'favorite'
     },
     progress: {
       type: String,
@@ -86,7 +84,7 @@ export default {
 
   data() {
     return {
-      mode: 'review',
+      mode: 'favorite',
       progressFilter: 'marked',
       works: [],
       stopLoad: false,
@@ -223,6 +221,9 @@ export default {
 
       if (this.mode === 'progress') {
         params.filter = this.progressFilter;
+      }
+      if (this.mode === 'favorite') {
+        params.favorite = true;
       }
 
       return this.$axios.get('/api/review', { params })

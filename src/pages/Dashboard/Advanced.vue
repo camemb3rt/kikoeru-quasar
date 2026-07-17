@@ -14,6 +14,7 @@
 
           <q-item-section avatar>
             <div class="q-gutter-sm">
+              <q-radio dense v-model="config.tagLanguage" val="en-us" label="English" />
               <q-radio dense v-model="config.tagLanguage" val="ja-jp" label="Japanese" />
               <q-radio dense v-model="config.tagLanguage" val="zh-cn" label="Chinese (Simplified)" />
               <q-radio dense v-model="config.tagLanguage" val="zh-tw" label="Chinese (Traditional)" />

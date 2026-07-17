@@ -40,6 +40,25 @@
             </q-item-section>
           </q-item>
         </q-list>
+
+        <q-list padding class="col-auto">
+          <q-item
+            clickable
+            v-ripple
+            exact
+            :to="bottomLink.path"
+            active-class="text-primary text-weight-bold"
+            class="text-subtitle1"
+          >
+            <q-item-section avatar>
+              <q-icon :name="bottomLink.icon" />
+            </q-item-section>
+
+            <q-item-section>
+              {{ bottomLink.title }}
+            </q-item-section>
+          </q-item>
+        </q-list>
       </div>
     </q-drawer>
 
@@ -81,14 +100,13 @@ export default {
           title: 'Advanced',
           icon: 'settings',
           path: '/admin/advanced'
-        },
-
-        {
-          title: 'Back Home',
-          icon: 'home',
-          path: '/'
         }
-      ]
+      ],
+      bottomLink: {
+        title: 'Back to Library',
+        icon: 'home',
+        path: '/'
+      }
     };
   },
 

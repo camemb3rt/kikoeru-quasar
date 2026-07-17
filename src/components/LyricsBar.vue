@@ -127,8 +127,14 @@ export default {
     background-color: transparent !important;
   }
   #lyricsBar {
-    background-color: rgba($grey-4, $alpha: 0.6);
     min-width: 1vw;
     position: absolute;
+  }
+
+  #lyric {
+    background-color: rgba($grey-4, $alpha: 0.6);
+    border-radius: 0.5rem;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
   }
 </style>

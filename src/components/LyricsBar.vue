@@ -126,9 +126,19 @@ export default {
   .moveable-line {
     background-color: transparent !important;
   }
+  #draggable {
+    display: inline-block;
+    max-width: 100vw;
+    position: relative;
+  }
   #lyricsBar {
+    max-width: 100%;
     min-width: 1vw;
-    position: absolute;
+    position: relative;
+  }
+
+  #lyricsBar .q-slider {
+    width: 100%;
   }
 
   #lyric {

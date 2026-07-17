@@ -127,6 +127,9 @@ const mutations = {
   SET_CURRENT_LYRIC: (state, line) => {
     state.currentLyric = line
   },
+  SET_LYRIC_AVAILABLE: (state, available) => {
+    state.lyricAvailable = available
+  },
   SET_LYRIC_FONT_SIZE: (state, size) => {
     state.lyricFontSize = size
   },

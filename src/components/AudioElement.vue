@@ -178,6 +178,7 @@ export default {
       'SET_TRACK',
       'NEXT_TRACK',
       'SET_CURRENT_LYRIC',
+      'SET_LYRIC_AVAILABLE',
       'SET_VOLUME',
       'CLEAR_SLEEP_MODE',
       'SET_REWIND_SEEK_MODE',
@@ -284,6 +285,8 @@ export default {
     },
 
     loadLrcFile () {
+      this.lrcAvailable = false;
+      this.SET_LYRIC_AVAILABLE(false);
       const token = this.$q.localStorage.getItem('jwt-token') || '';
       const fileHash = this.queue[this.queueIndex].hash;
       const url = `/api/media/check-lrc/${fileHash}?token=${token}`;
@@ -293,6 +296,7 @@ export default {
           if (response.data.result) {
             // 有lrc歌词文件
             this.lrcAvailable = true;
+            this.SET_LYRIC_AVAILABLE(true);
             const lrcUrl = `/api/media/stream/${response.data.mediaPath}?token=${token}`;
             const lyricExtension = (response.data.lyricExtension || '').toLowerCase();
             this.$axios.get(lrcUrl)
@@ -307,6 +311,7 @@ export default {
           } else {
             // 无歌词文件
             this.lrcAvailable = false;
+            this.SET_LYRIC_AVAILABLE(false);
             this.lrcObj.setLyric('');
             this.SET_CURRENT_LYRIC('');
           }
@@ -318,6 +323,10 @@ export default {
               this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
             }
           } else {
+            this.lrcAvailable = false;
+            this.SET_LYRIC_AVAILABLE(false);
+            this.lrcObj.setLyric('');
+            this.SET_CURRENT_LYRIC('');
             this.showErrNotif(error.message || error);
           }
         })

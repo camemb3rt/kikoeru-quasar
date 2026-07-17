@@ -1,27 +1,46 @@
 <template>
     <q-card
       id="draggable"
+      v-show="lyricAvailable"
+      @mouseenter="showSizeSlider"
+      @mouseleave="hideSizeSlider"
+      @mousemove="showSizeSlider"
       @mousedown="onCursorDown"
       @mouseup="onCursorUp"
       @touchstart="onCursorDown"
       @touchend="onCursorUp"
     >
-        <div id="lyricsBar" class="text-center text-bold ellipsis-2-lines q-mb-md absolute-bottom" :style="lyricStyle">
+        <div
+          id="lyricsBar"
+          class="text-center text-bold ellipsis-2-lines q-mb-md"
+          :style="lyricStyle"
+          @wheel.prevent="adjustLyricFontSize"
+        >
             <span id="lyric">
               {{currentLyric}}
             </span>
+        </div>
+        <div
+          v-show="sizeSliderVisible"
+          id="lyricsSizeControl"
+          @mousedown.capture="onSizeSliderDown"
+          @mouseup.capture="onSizeSliderUp"
+          @touchstart.capture="onSizeSliderDown"
+          @touchend.capture="onSizeSliderUp"
+          @mousedown.stop="onSizeSliderDown"
+          @mouseup.stop="onSizeSliderUp"
+          @touchstart.stop="onSizeSliderDown"
+          @touchend.stop="onSizeSliderUp"
+          @wheel.prevent="adjustLyricFontSize"
+        >
             <q-slider
               v-model="lyricFontSize"
               class="q-px-md q-mt-xs"
               :min="12"
               :max="56"
               :step="1"
-              :label="true"
-              :label-value="`${lyricFontSize}px`"
-              color="purple"
+              color="grey-6"
               @input="setLyricFontSize"
-              @mousedown.stop
-              @touchstart.stop
             />
         </div>
     </q-card>
@@ -42,6 +61,9 @@ const onCursorMove = (that) => (ev) => {
 
   that.draggable.style.left = eleX + 'px'
   that.draggable.style.top = eleY + 'px'
+  that.draggable.style.bottom = 'auto'
+  that.$q.localStorage.set('lyricBarPosition', { left: eleX, top: eleY })
+  that.showSizeSlider()
 
 }
 
@@ -51,7 +73,8 @@ export default {
   computed: {
     ...mapState('AudioPlayer', [
       'currentLyric',
-      'lyricFontColor'
+      'lyricFontColor',
+      'lyricAvailable'
     ]),
 
     draggable() {
@@ -69,6 +92,8 @@ export default {
   data () {
     return {
       beTouched: false,
+      sizeSliderInteracting: false,
+      sizeSliderVisible: false,
 
       // 鼠标按下时的位置
       startX: 0,
@@ -90,6 +115,7 @@ export default {
     onCursorDown(ev) {
       ev.preventDefault()
       this.beTouched = true
+      this.showSizeSlider()
 
       // 移动端使用 ev.touches[0]
       const touch = this.getTouch(ev)
@@ -100,6 +126,34 @@ export default {
     onCursorUp(ev) {
       ev.preventDefault()
       this.beTouched = false
+      setTimeout(() => this.hideSizeSlider(), 300)
+    },
+
+    showSizeSlider() {
+      this.sizeSliderVisible = true
+    },
+
+    hideSizeSlider() {
+      if (!this.beTouched && !this.sizeSliderInteracting) {
+        this.sizeSliderVisible = false
+      }
+    },
+
+    onSizeSliderDown() {
+      this.sizeSliderInteracting = true
+      this.showSizeSlider()
+    },
+
+    onSizeSliderUp() {
+      if (!this.sizeSliderInteracting) return
+      this.sizeSliderInteracting = false
+    },
+
+    adjustLyricFontSize(event) {
+      const direction = event.deltaY < 0 ? 1 : -1
+      const size = Math.min(56, Math.max(12, this.lyricFontSize + direction))
+      this.lyricFontSize = size
+      this.setLyricFontSize(size)
     },
 
     setLyricFontSize(size) {
@@ -109,6 +163,12 @@ export default {
   },
 
   mounted() {
+    const lyricBarPosition = this.$q.localStorage.getItem('lyricBarPosition')
+    if (lyricBarPosition && Number.isFinite(lyricBarPosition.left) && Number.isFinite(lyricBarPosition.top)) {
+      this.draggable.style.left = lyricBarPosition.left + 'px'
+      this.draggable.style.top = lyricBarPosition.top + 'px'
+      this.draggable.style.bottom = 'auto'
+    }
     if (this.$q.localStorage.has('lyricFontSize')) {
       this.lyricFontSize = this.$q.localStorage.getItem('lyricFontSize')
       this.SET_LYRIC_FONT_SIZE(this.lyricFontSize)
@@ -118,6 +178,13 @@ export default {
     }
     addEventListener('mousemove', onCursorMove(this), false)
     addEventListener('touchmove', onCursorMove(this), false)
+    addEventListener('mouseup', this.onSizeSliderUp, false)
+    addEventListener('touchend', this.onSizeSliderUp, false)
+  },
+
+  beforeDestroy() {
+    removeEventListener('mouseup', this.onSizeSliderUp, false)
+    removeEventListener('touchend', this.onSizeSliderUp, false)
   }
 }
 </script>
@@ -127,18 +194,29 @@ export default {
     background-color: transparent !important;
   }
   #draggable {
+    background-color: transparent;
+    bottom: 48px;
+    box-shadow: none;
     display: inline-block;
+    left: 0;
     max-width: 100vw;
-    position: relative;
+    overflow: visible;
+    padding: 12px;
+    position: absolute;
+    text-align: center;
+    z-index: 2;
   }
+
   #lyricsBar {
+    display: inline-block;
     max-width: 100%;
     min-width: 1vw;
     position: relative;
   }
 
-  #lyricsBar .q-slider {
-    width: 100%;
+  #lyricsSizeControl {
+    margin: 0 auto;
+    width: 320px;
   }
 
   #lyric {

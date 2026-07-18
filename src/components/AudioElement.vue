@@ -79,13 +79,17 @@ export default {
       }
     },
 
-    mediaSessionArtworkUrl () {
+    mediaSessionArtwork () {
       const hash = this.currentPlayingFile.hash
-      if (!hash || typeof window === 'undefined') return ''
+      if (!hash || typeof window === 'undefined') return []
 
       const token = this.$q.localStorage.getItem('jwt-token') || ''
       const workId = hash.split('/')[0]
-      return new URL(`/api/cover/${workId}?type=sam&token=${token}`, window.location.origin).href
+      const coverUrl = type => new URL(`/api/cover/${workId}?type=${type}&token=${token}`, window.location.origin).href
+      return [
+        { src: coverUrl('main'), sizes: '560x420', type: 'image/jpeg' },
+        { src: coverUrl('sam'), sizes: '100x100', type: 'image/jpeg' }
+      ]
     },
 
     ...mapState('AudioPlayer', [
@@ -214,14 +218,11 @@ export default {
         return
       }
 
-      const artwork = this.mediaSessionArtworkUrl
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: file.title || file.workTitle || 'Kikoeru',
         artist: file.workTitle || '',
         album: file.workTitle || '',
-        artwork: artwork
-          ? [{ src: artwork, sizes: '512x512', type: 'image/jpeg' }]
-          : []
+        artwork: this.mediaSessionArtwork
       })
     },
 

@@ -176,12 +176,12 @@
           dense
           size="md"
           padding="none sm"
-          :icon="lyricVisible ? 'subtitles' : 'subtitles_off'"
+          :icon="lyricHidden ? 'subtitles_off' : 'subtitles'"
           :disable="!lyricAvailable"
           @click="toggleLyricVisibility()"
           class="q-ma-sm"
         >
-          <q-tooltip>{{ lyricVisible ? 'Hide subtitles' : 'Show subtitles' }}</q-tooltip>
+          <q-tooltip>{{ lyricHidden ? 'Show subtitles' : 'Hide subtitles' }}</q-tooltip>
         </q-btn>
       </div>
     </q-card>
@@ -425,7 +425,7 @@ export default {
       "rewindSeekTime",
       "forwardSeekTime",
       "lyricAvailable",
-      "lyricVisible"
+      "lyricHidden"
     ]),
 
     ...mapGetters("AudioPlayer", ["currentPlayingFile"])
@@ -451,7 +451,7 @@ export default {
       "SET_VOLUME",
       "SET_REWIND_SEEK_TIME",
       "SET_FORWARD_SEEK_TIME",
-      "SET_LYRIC_VISIBLE"
+      "SET_LYRIC_HIDDEN"
     ]),
 
     formatSeconds(seconds) {
@@ -474,7 +474,7 @@ export default {
     },
 
     toggleLyricVisibility() {
-      this.SET_LYRIC_VISIBLE(!this.lyricVisible)
+      this.SET_LYRIC_HIDDEN(!this.lyricHidden)
     },
 
     samCoverUrl(hash) {

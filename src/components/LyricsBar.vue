@@ -1,7 +1,7 @@
 <template>
     <q-card
       id="draggable"
-      v-show="lyricAvailable && lyricVisible"
+      v-show="lyricAvailable && !lyricHidden"
       @mouseenter="showSizeSlider"
       @mouseleave="hideSizeSlider"
       @mousemove="showSizeSlider"
@@ -83,7 +83,7 @@ export default {
       'currentLyric',
       'lyricFontColor',
       'lyricAvailable',
-      'lyricVisible'
+      'lyricHidden'
     ]),
 
     draggable() {
@@ -249,8 +249,8 @@ export default {
       }
     },
 
-    lyricVisible(visible) {
-      if (!visible) {
+    lyricHidden(hidden) {
+      if (hidden) {
         this.sizeSliderVisible = false
       } else if (this.isMobile) {
         this.showSizeSlider()

@@ -1,7 +1,7 @@
 <template>
     <q-card
       id="draggable"
-      v-show="lyricAvailable"
+      v-show="lyricAvailable && lyricVisible"
       @mouseenter="showSizeSlider"
       @mouseleave="hideSizeSlider"
       @mousemove="showSizeSlider"
@@ -82,7 +82,8 @@ export default {
     ...mapState('AudioPlayer', [
       'currentLyric',
       'lyricFontColor',
-      'lyricAvailable'
+      'lyricAvailable',
+      'lyricVisible'
     ]),
 
     draggable() {
@@ -245,6 +246,14 @@ export default {
       } else {
         this.lyricBottom = null
         this.sizeSliderVisible = false
+      }
+    },
+
+    lyricVisible(visible) {
+      if (!visible) {
+        this.sizeSliderVisible = false
+      } else if (this.isMobile) {
+        this.showSizeSlider()
       }
     }
   },

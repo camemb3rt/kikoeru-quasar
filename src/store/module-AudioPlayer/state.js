@@ -22,6 +22,7 @@ export default function () {
     volume: 0, // 音量 (0.0-1.0)
     currentLyric: '',
     lyricAvailable: false,
+    lyricVisible: true,
     lyricFontSize: 20,
     lyricFontColor: '#9c27b0',
     sleepTime: null,

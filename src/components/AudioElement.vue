@@ -347,10 +347,15 @@ export default {
       }
     },
 
+    isAudioPlaying () {
+      if (!this.player) return false
+      const media = this.player.media
+      return media ? !media.paused && !media.ended : !this.player.paused
+    },
 
     playLrc (playStatus) {
       if (this.lrcAvailable) {
-        if (playStatus) {
+        if (playStatus && this.isAudioPlaying()) {
           this.lrcObj.play(this.player.currentTime * 1000);
         } else {
           this.lrcObj.pause();
@@ -361,7 +366,7 @@ export default {
     initLrcObj () {
         this.lrcObj = new Lyric({
           onPlay: (line, text) => {
-            this.SET_CURRENT_LYRIC(text);
+            if (this.isAudioPlaying()) this.SET_CURRENT_LYRIC(text);
           },
         })
     },
@@ -388,7 +393,7 @@ export default {
                   ? subtitleToLrc(lyricResponse.data)
                   : lyricResponse.data;
                 this.lrcObj.setLyric(lyricContent);
-                this.lrcObj.play(this.player.currentTime * 1000);
+                this.playLrc(this.playing);
               });
           } else {
             // 无歌词文件

@@ -1,8 +1,10 @@
 <template>
   <div class="row q-ma-md">
-    <div class="cover-favorite-wrapper col-12 col-md-4 q-pl-md-md q-pt-md-md content-center">
-      <CoverSFW :workid="metadata.id" :nsfw="false" :release="metadata.release" :refresh-key="coverRefreshKey" style="border-radius: 8px; overflow: hidden; max-width: 560px;" />
-      <q-btn round dense class="cover-favorite-button" :icon="favorite ? 'favorite' : 'favorite_border'" :color="favorite ? 'red' : 'grey-6'" @click.stop.prevent="toggleFavorite" />
+    <div class="col-12 col-md-4 q-pl-md-md q-pt-md-md content-center">
+      <div class="cover-favorite-wrapper">
+        <CoverSFW :workid="metadata.id" :nsfw="false" :release="metadata.release" :refresh-key="coverRefreshKey" style="border-radius: 8px; overflow: hidden; max-width: 560px;" />
+        <q-btn round dense class="cover-favorite-button" :icon="favorite ? 'favorite' : 'favorite_border'" :color="favorite ? 'red' : 'grey-6'" @click.stop.prevent="toggleFavorite" />
+      </div>
     </div>
 
     <div class="col-md-6 col-12 q-pa-sm">
@@ -405,11 +407,12 @@ export default {
     },
 
     setProgress(newProgress) {
-      this.progress = newProgress;
+      const progress = this.progress === newProgress ? null : newProgress;
+      this.progress = progress || '';
       const submitPayload = {
         user_name: this.$store.state.User.name, // 用户名不会被后端使用
         work_id: this.metadata.id,
-        progress: newProgress
+        progress
       };
       this.submitProgress(submitPayload);
     },
@@ -502,14 +505,17 @@ export default {
 }
 
 .cover-favorite-wrapper {
+  display: inline-block;
+  max-width: 560px;
   position: relative;
+  width: 100%;
 }
 
 .cover-favorite-button {
   opacity: 0;
   position: absolute;
-  right: 20px;
-  top: 20px;
+  right: 12px;
+  top: 12px;
   transition: opacity 160ms ease;
   z-index: 2;
 }

@@ -30,10 +30,10 @@
 
       <q-item-label v-if="showLabel && $q.screen.width > 700">
         <div class="row q-gutter-x-sm q-gutter-y-xs">
-          <router-link v-for="(tag, index) in metadata.tags" :to="`/works?tagId=${tag.id}`" :key=index
-            class="col-auto text-grey">
+          <span v-for="(tag, index) in metadata.tags" :key=index
+            class="library-tag col-auto text-grey cursor-pointer" :class="{ 'library-tag-match': matchesSearchKeyword(tag.name) }" @click.stop="$emit('add-search-tag', tag.name)">
             {{ tag.name }}
-          </router-link>
+          </span>
         </div>
       </q-item-label>
     </q-item-section>
@@ -54,6 +54,10 @@ export default {
       type: Boolean,
       default: true
     },
+    searchKeywords: {
+      type: Array,
+      default: () => []
+    },
   },
 
   computed: {
@@ -62,6 +66,21 @@ export default {
       const token = this.$q.localStorage.getItem('jwt-token') || ''
       return this.metadata.id ? `/api/cover/${this.metadata.id}?type=sam&token=${token}` : ""
     },
+    matchesSearchKeyword(tagName) {
+      const normalizedTagName = tagName.toLowerCase();
+      return this.searchKeywords.some(keyword => normalizedTagName.includes(keyword.toLowerCase()));
+    }
   }
 }
 </script>
+
+<style scoped>
+.library-tag-match {
+  color: var(--q-color-primary) !important;
+  font-weight: 700;
+}
+
+.library-tag:hover {
+  color: var(--q-color-primary) !important;
+}
+</style>

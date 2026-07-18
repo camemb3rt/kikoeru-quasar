@@ -1,22 +1,43 @@
 <template>
   <div class="q-ma-md">
     <q-breadcrumbs gutter="xs" v-if="path.length">
-      <q-breadcrumbs-el>
-        <q-btn no-caps flat dense size="md" icon="folder" label="ROOT" style="height: 30px;" @click="path = []" />
-      </q-breadcrumbs-el>
+        <q-breadcrumbs-el>
+          <q-btn no-caps flat dense size="md" icon="folder" label="ROOT" style="height: 30px;" @click="goToRoot" />
+        </q-breadcrumbs-el>
 
-      <q-breadcrumbs-el v-for="(folderName, index) in path" :key="index" class="cursor-pointer">
-        <q-btn
-          no-caps
-          flat
-          dense
-          size="md"
-          icon="folder"
-          style="height: 30px;"
-          :label="folderName"
-          @click="onClickBreadcrumb(index)"
-        />
-      </q-breadcrumbs-el>
+        <q-breadcrumbs-el v-for="(folderName, index) in path" :key="index" class="cursor-pointer">
+          <q-btn
+            no-caps
+            flat
+            dense
+            size="md"
+            icon="folder"
+            style="height: 30px;"
+            :label="folderName"
+            @click="onClickBreadcrumb(index)"
+            v-if="index !== path.length - 1"
+          />
+          <q-btn-dropdown
+            v-else
+            no-caps
+            flat
+            dense
+            size="md"
+            icon="folder"
+            style="height: 30px;"
+            :label="folderName"
+            dropdown-icon="arrow_drop_down"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="toggleDefaultPath">
+                <q-item-section>Make this the default folder</q-item-section>
+                <q-item-section side>
+                  <q-icon v-if="isDefaultPath" name="check" color="positive" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </q-breadcrumbs-el>
     </q-breadcrumbs>
 
     <q-card>
@@ -111,13 +132,18 @@ export default {
       isViewer: true,
       viewerFiles: [],
       viewerFileIndex: 0,
-      stopLoad: false
+      stopLoad: false,
+      defaultPath: null
     };
   },
 
   props: {
     tree: {
       type: Array,
+      required: true
+    },
+    workId: {
+      type: [String, Number],
       required: true
     }
   },
@@ -143,6 +169,18 @@ export default {
       return fatherFolder;
     },
 
+    lastPathStorageKey() {
+      return `workTreeLastPath:${this.workId}`;
+    },
+
+    defaultPathStorageKey() {
+      return `workTreeDefaultPath:${this.workId}`;
+    },
+
+    isDefaultPath() {
+      return Array.isArray(this.defaultPath) && JSON.stringify(this.defaultPath) === JSON.stringify(this.path);
+    },
+
     queue() {
       const queue = [];
       this.fatherFolder.forEach(item => {
@@ -166,26 +204,68 @@ export default {
     },
 
     initPath() {
-      const initialPath = [];
+      this.defaultPath = this.$q.localStorage.getItem(this.defaultPathStorageKey);
+      const savedPath = this.defaultPath ||
+        this.$q.localStorage.getItem(this.lastPathStorageKey);
+      const initialPath = this.isPathValid(savedPath) ? savedPath.concat() : [];
       let fatherFolder = this.tree.concat();
-      while (fatherFolder.length === 1) {
-        if (fatherFolder[0].type === 'audio') {
-          break;
+      if (!initialPath.length) {
+        while (fatherFolder.length === 1) {
+          if (fatherFolder[0].type === 'audio') {
+            break;
+          }
+          initialPath.push(fatherFolder[0].title);
+          fatherFolder = fatherFolder[0].children;
         }
-        initialPath.push(fatherFolder[0].title);
-        fatherFolder = fatherFolder[0].children;
       }
       this.path = initialPath;
+      this.rememberPath();
       this.stopLoad = true;
+    },
+
+    isPathValid(path) {
+      if (!Array.isArray(path)) return false;
+
+      let folder = this.tree;
+      return path.every(folderName => {
+        const nextFolder = folder.find(item => item.type === 'folder' && item.title === folderName);
+        if (!nextFolder || !Array.isArray(nextFolder.children)) return false;
+        folder = nextFolder.children;
+        return true;
+      });
+    },
+
+    rememberPath() {
+      this.$q.localStorage.set(this.lastPathStorageKey, this.path.concat());
+    },
+
+    toggleDefaultPath() {
+      if (this.isDefaultPath) {
+        this.defaultPath = null;
+        this.$q.localStorage.remove(this.defaultPathStorageKey);
+        this.$q.notify({ message: 'Default folder cleared for this work', color: 'positive', position: 'bottom' });
+        return;
+      }
+
+      this.defaultPath = this.path.concat();
+      this.$q.localStorage.set(this.defaultPathStorageKey, this.defaultPath);
+      this.$q.notify({ message: 'Default folder saved for this work', color: 'positive', position: 'bottom' });
+    },
+
+    goToRoot() {
+      this.path = [];
+      this.rememberPath();
     },
 
     onClickBreadcrumb(index) {
       this.path = this.path.slice(0, index + 1);
+      this.rememberPath();
     },
 
     onClickItem(item) {
       if (item.type === 'folder') {
         this.path.push(item.title);
+        this.rememberPath();
       } else if (item.type === 'text') {
         this.openFile(item);
       } else if (item.type === 'video' || item.type === 'image') {

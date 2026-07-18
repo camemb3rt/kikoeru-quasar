@@ -9,7 +9,46 @@
             { label: 'Progress', value: 'progress' }
           ]" />
       </div>
-      <div class="col-auto gt-sm row">
+      <div class="col-auto row items-center">
+        <q-rating
+          v-if="mode === 'review'"
+          v-model="reviewRatingFilter"
+          :max="5"
+          clearable
+          color="amber"
+          icon="star_border"
+          icon-selected="star"
+          class="q-mx-sm"
+          @input="reset"
+        />
+        <q-input
+          v-model="tagFilter"
+          dense
+          rounded
+          outlined
+          clearable
+          debounce="400"
+          label="Filter by tag"
+          class="q-mx-sm favourites-tag-filter"
+          :bg-color="$q.dark.isActive ? 'black' : 'white'"
+          @input="onTagFilterInput"
+          @focus="showTagFilterMenu = tagTerms.length > 0"
+        >
+          <template v-slot:append>
+            <q-icon name="sell" />
+            <q-icon v-if="tagTerms.length" name="arrow_drop_down" class="cursor-pointer" @click.stop="showTagFilterMenu = !showTagFilterMenu" />
+          </template>
+          <q-menu v-model="showTagFilterMenu" anchor="bottom left" self="top left">
+            <q-list dense style="min-width: 220px;">
+              <q-item v-for="tag in tagTerms" :key="tag">
+                <q-item-section>{{ tag }}</q-item-section>
+                <q-item-section side>
+                  <q-btn flat round dense size="sm" icon="close" @click="removeTagFilter(tag)" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-input>
         <q-select dense rounded outlined v-model="sortBy" :options="sortOptions" class="q-mx-sm"
           :bg-color="$q.dark.isActive ? 'black' : 'white'">
         </q-select>
@@ -35,7 +74,7 @@
           <div class="row justify-center text-grey" v-if="works.length === 0">{{ mode === 'favorite' ? 'Heart works to add them to your favourites.' : 'Rate or mark progress on a work to have it appear here' }}</div>
           <q-list bordered separator class="shadow-2" v-if="works.length">
             <FavListItem v-for="work in works" :key="work.id" :workid="work.id" :metadata="work" @reset="reset()"
-              :mode="mode"></FavListItem>
+              :mode="mode" :tag-filter="tagFilter" @filter-tag="addTagFilter"></FavListItem>
           </q-list>
           <template v-slot:loading>
             <div class="row justify-center q-my-md">
@@ -79,6 +118,10 @@ export default {
 
     sortButtonDisabled() {
       return this.sortBy.order === 'allage' || this.sortBy.order === 'nsfw'
+    },
+
+    tagTerms() {
+      return (this.tagFilter || '').split(',').map(tag => tag.trim()).filter(Boolean);
     }
   },
 
@@ -86,9 +129,13 @@ export default {
     return {
       mode: 'favorite',
       progressFilter: 'marked',
+      reviewRatingFilter: 0,
+      tagFilter: '',
+      showTagFilterMenu: false,
       works: [],
       stopLoad: false,
       pagination: { currentPage: 0, pageSize: 12, totalCount: 0 },
+      requestId: 0,
       sortMode: 'desc',
       sortBy: {
         label: 'Favourited Time',
@@ -185,12 +232,37 @@ export default {
       }
     },
 
+    addTagFilter(tagName) {
+      const tags = this.tagTerms.concat();
+      if (tags.includes(tagName)) {
+        this.tagFilter = tags.filter(tag => tag !== tagName).join(', ');
+      } else {
+        tags.push(tagName);
+        this.tagFilter = tags.join(', ');
+      }
+      this.showTagFilterMenu = this.tagTerms.length > 0;
+      this.reset();
+    },
+
+    onTagFilterInput(value) {
+      this.tagFilter = value || '';
+      this.showTagFilterMenu = this.tagTerms.length > 0;
+      this.reset();
+    },
+
+    removeTagFilter(tagName) {
+      this.tagFilter = this.tagTerms.filter(tag => tag !== tagName).join(', ');
+      this.showTagFilterMenu = this.tagTerms.length > 0;
+      this.reset();
+    },
+
     onLoad(index, done) {
       this.requestWorksQueue()
         .then(() => done())
     },
 
     reset() {
+      this.requestId += 1;
       // Freeze the scroller first
       this.stopLoad = true
       this.pagination = { currentPage: 0, pageSize: 12, totalCount: 0 }
@@ -203,6 +275,7 @@ export default {
     },
 
     requestWorksQueue() {
+      const requestId = this.requestId;
       const params = {
         order: this.sortBy.order,
         sort: this.sortMode,
@@ -225,9 +298,20 @@ export default {
       if (this.mode === 'favorite') {
         params.favorite = true;
       }
+      if (this.mode === 'review') {
+        params.review = true;
+        if (this.reviewRatingFilter) {
+          params.minRating = this.reviewRatingFilter;
+        }
+      }
+      const tagFilter = (this.tagFilter || '').trim();
+      if (tagFilter) {
+        params.tag = tagFilter;
+      }
 
       return this.$axios.get('/api/review', { params })
         .then((response) => {
+          if (requestId !== this.requestId) return;
           const works = response.data.works
           this.works = (params.page === 1) ? works.concat() : this.works.concat(works)
           this.pagination = response.data.pagination
@@ -251,3 +335,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.favourites-tag-filter {
+  width: 260px;
+}
+</style>

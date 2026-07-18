@@ -1,20 +1,20 @@
 <template>
     <q-card
       id="draggable"
-      v-show="lyricAvailable"
+      v-show="lyricAvailable && !lyricHidden"
       @mouseenter="showSizeSlider"
       @mouseleave="hideSizeSlider"
       @mousemove="showSizeSlider"
-      @mousedown="onCursorDown"
-      @mouseup="onCursorUp"
-      @touchstart="onCursorDown"
-      @touchend="onCursorUp"
       @wheel.prevent="adjustLyricFontSize"
     >
         <div
           id="lyricsBar"
           class="text-center text-bold ellipsis-2-lines q-mb-md"
           :style="lyricStyle"
+          @mousedown="onCursorDown"
+          @mouseup="onCursorUp"
+          @touchstart="onCursorDown"
+          @touchend="onCursorUp"
           @wheel.prevent="adjustLyricFontSize"
         >
             <span id="lyric">
@@ -70,6 +70,7 @@ const onCursorMove = (that) => (ev) => {
   that.draggable.style.top = eleY + 'px'
   that.draggable.style.bottom = 'auto'
   that.$q.localStorage.set('lyricBarPosition', { left: eleX, top: eleY, centered: true })
+  that.captureLyricBottom()
   that.showSizeSlider()
 
 }
@@ -81,11 +82,16 @@ export default {
     ...mapState('AudioPlayer', [
       'currentLyric',
       'lyricFontColor',
-      'lyricAvailable'
+      'lyricAvailable',
+      'lyricHidden'
     ]),
 
     draggable() {
       return document.getElementById('draggable')
+    },
+
+    isMobile() {
+      return this.$q.platform.is.mobile
     },
 
     lyricStyle() {
@@ -102,6 +108,8 @@ export default {
       savedLyricBarPosition: null,
       sizeSliderInteracting: false,
       sizeSliderVisible: false,
+      lyricBottom: null,
+      lyricsResizeObserver: null,
 
       // 鼠标按下时的位置
       startX: 0,
@@ -130,6 +138,7 @@ export default {
       const rect = this.draggable.getBoundingClientRect()
       this.startX = touch.clientX - rect.left
       this.startY = touch.clientY - rect.top
+      this.captureLyricBottom()
     },
 
     onCursorUp(ev) {
@@ -149,6 +158,7 @@ export default {
     },
 
     hideSizeSlider() {
+      if (this.isMobile) return
       if (!this.beTouched && !this.sizeSliderInteracting) {
         this.sizeSliderVisible = false
       }
@@ -171,6 +181,35 @@ export default {
       this.setLyricFontSize(size)
     },
 
+    captureLyricBottom() {
+      const lyricsBar = document.getElementById('lyricsBar')
+      if (!lyricsBar || !this.lyricAvailable) return
+      const rect = lyricsBar.getBoundingClientRect()
+      if (rect.height) this.lyricBottom = rect.bottom
+    },
+
+    keepLyricBottomAnchored() {
+      if (this.beTouched || !this.lyricAvailable || !this.draggable) return
+
+      const lyricsBar = document.getElementById('lyricsBar')
+      if (!lyricsBar) return
+
+      const lyricsRect = lyricsBar.getBoundingClientRect()
+      if (!lyricsRect.height) return
+
+      if (this.lyricBottom !== null && Math.abs(lyricsRect.bottom - this.lyricBottom) > 0.5) {
+        const draggableRect = this.draggable.getBoundingClientRect()
+        const requestedTop = draggableRect.top + this.lyricBottom - lyricsRect.bottom
+        const maxTop = Math.max(0, window.innerHeight - draggableRect.height)
+        const top = Math.min(Math.max(requestedTop, 0), maxTop)
+
+        this.draggable.style.top = top + 'px'
+        this.draggable.style.bottom = 'auto'
+      }
+
+      this.captureLyricBottom()
+    },
+
     applySavedPosition() {
       if (!this.savedLyricBarPosition) return
 
@@ -189,6 +228,7 @@ export default {
         this.draggable.style.left = left + 'px'
         this.draggable.style.top = top + 'px'
         this.draggable.style.bottom = 'auto'
+        this.captureLyricBottom()
       })
     },
 
@@ -200,7 +240,21 @@ export default {
 
   watch: {
     lyricAvailable(available) {
-      if (available) this.applySavedPosition()
+      if (available) {
+        this.applySavedPosition()
+        if (this.isMobile) this.showSizeSlider()
+      } else {
+        this.lyricBottom = null
+        this.sizeSliderVisible = false
+      }
+    },
+
+    lyricHidden(hidden) {
+      if (hidden) {
+        this.sizeSliderVisible = false
+      } else if (this.isMobile) {
+        this.showSizeSlider()
+      }
     }
   },
 
@@ -214,6 +268,15 @@ export default {
     if (this.$q.localStorage.has('lyricFontColor')) {
       this.SET_LYRIC_FONT_COLOR(this.$q.localStorage.getItem('lyricFontColor'))
     }
+    this.$nextTick(() => {
+      const lyricsBar = document.getElementById('lyricsBar')
+      if (window.ResizeObserver && lyricsBar) {
+        this.lyricsResizeObserver = new ResizeObserver(() => this.keepLyricBottomAnchored())
+        this.lyricsResizeObserver.observe(lyricsBar)
+      }
+      this.captureLyricBottom()
+      if (this.isMobile && this.lyricAvailable) this.showSizeSlider()
+    })
     addEventListener('mousemove', onCursorMove(this), false)
     addEventListener('touchmove', onCursorMove(this), false)
     addEventListener('mouseup', this.onGlobalCursorUp, false)
@@ -221,6 +284,7 @@ export default {
   },
 
   beforeDestroy() {
+    if (this.lyricsResizeObserver) this.lyricsResizeObserver.disconnect()
     removeEventListener('mouseup', this.onGlobalCursorUp, false)
     removeEventListener('touchend', this.onGlobalCursorUp, false)
   }

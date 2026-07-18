@@ -130,6 +130,9 @@ const mutations = {
   SET_LYRIC_AVAILABLE: (state, available) => {
     state.lyricAvailable = available
   },
+  SET_LYRIC_HIDDEN: (state, hidden) => {
+    state.lyricHidden = hidden
+  },
   SET_LYRIC_FONT_SIZE: (state, size) => {
     state.lyricFontSize = size
   },

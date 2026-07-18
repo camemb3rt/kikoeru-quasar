@@ -64,13 +64,13 @@
 
         <!-- 列表模式 -->
         <q-list v-if="showMode == 'list'" bordered separator class="shadow-2">
-          <WorkListItem v-for="work in works" :key="work.id" :metadata="work" :showLabel="$q.screen.width > 700" />
+          <WorkListItem v-for="work in works" :key="work.id" :metadata="work" :showLabel="$q.screen.width > 700" :search-keywords="keywords" @add-search-tag="addSearchTag" />
         </q-list>
 
         <!-- 卡片模式 -->
         <div v-else class="row q-col-gutter-x-md q-col-gutter-y-lg">
           <div class="col-xs-12 col-sm-4 col-md-3" :class="'col-lg-2 col-xl-2'" v-for="work in works" :key="work.id">
-            <WorkCard :metadata="work" :thumbnailMode="showMode == 'thumbnail'" class="fit" />
+            <WorkCard :metadata="work" :thumbnailMode="showMode == 'thumbnail'" :search-keywords="keywords" class="fit" @add-search-tag="addSearchTag" />
           </div>
         </div>
       </q-infinite-scroll>
@@ -307,6 +307,17 @@ export default {
       keyword.splice(index, 1);
       const query = keyword.length ? { keyword: keyword.join(';') } : {};
       this.$router.push({ name: 'works', query: query });
+    },
+
+    addSearchTag(tagName) {
+      const keywords = this.keywords.concat();
+      if (keywords.includes(tagName)) {
+        keywords.splice(keywords.indexOf(tagName), 1);
+      } else {
+        keywords.push(tagName);
+      }
+      const query = keywords.length ? { keyword: keywords.join(';') } : {};
+      this.$router.push({ name: 'works', query });
     }
   }
 };

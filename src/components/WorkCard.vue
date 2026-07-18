@@ -120,9 +120,9 @@
           v-for="(tag, index) in metadata.tags"
           :key="index"
           size="md"
-          class="shadow-2 cursor-pointer"
-          :class="{ 'bg-grey-9': $q.dark.isActive }"
-          @click.native="toTagSearch(tag.name)"
+          class="library-tag shadow-2 cursor-pointer"
+          :class="{ 'bg-grey-9': $q.dark.isActive, 'library-tag-match': matchesSearchKeyword(tag.name) }"
+          @click.native="$emit('add-search-tag', tag.name)"
         >
           {{ tag.name }}
         </q-chip>
@@ -163,6 +163,10 @@ export default {
     thumbnailMode: {
       type: Boolean,
       default: false
+    },
+    searchKeywords: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -230,11 +234,9 @@ export default {
           }
         });
     },
-    toTagSearch(tagName) {
-      const keyword = this.$q.sessionStorage.has('keyword') ? this.$q.sessionStorage.getItem('keyword').join(';') : '';
-      if (tagName !== keyword) {
-        this.$router.push({ name: 'works', query: { keyword: tagName } });
-      }
+    matchesSearchKeyword(tagName) {
+      const normalizedTagName = tagName.toLowerCase();
+      return this.searchKeywords.some(keyword => normalizedTagName.includes(keyword.toLowerCase()));
     },
     formatSeconds(seconds) {
       return seconds / 3600 < 0 ? `${Math.floor(seconds / 60)}m` : `${(seconds / 3600).toFixed(1)}h`;
@@ -242,3 +244,11 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.library-tag:hover,
+.library-tag-match {
+  background-color: var(--q-color-primary) !important;
+  color: white !important;
+}
+</style>

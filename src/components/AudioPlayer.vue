@@ -171,6 +171,18 @@
         >
           <q-tooltip>Open work details</q-tooltip>
         </q-btn>
+        <q-btn
+          flat
+          dense
+          size="md"
+          padding="none sm"
+          :icon="lyricHidden ? 'subtitles_off' : 'subtitles'"
+          :disable="!lyricAvailable"
+          @click="toggleLyricVisibility()"
+          class="q-ma-sm"
+        >
+          <q-tooltip>{{ lyricHidden ? 'Show subtitles' : 'Hide subtitles' }}</q-tooltip>
+        </q-btn>
       </div>
     </q-card>
 
@@ -411,7 +423,9 @@ export default {
       "queueIndex",
       "playMode",
       "rewindSeekTime",
-      "forwardSeekTime"
+      "forwardSeekTime",
+      "lyricAvailable",
+      "lyricHidden"
     ]),
 
     ...mapGetters("AudioPlayer", ["currentPlayingFile"])
@@ -436,7 +450,8 @@ export default {
       "EMPTY_QUEUE",
       "SET_VOLUME",
       "SET_REWIND_SEEK_TIME",
-      "SET_FORWARD_SEEK_TIME"
+      "SET_FORWARD_SEEK_TIME",
+      "SET_LYRIC_HIDDEN"
     ]),
 
     formatSeconds(seconds) {
@@ -456,6 +471,10 @@ export default {
           : Math.floor(seconds % 60);
 
       return h === "00" ? m + ":" + s : h + ":" + m + ":" + s;
+    },
+
+    toggleLyricVisibility() {
+      this.SET_LYRIC_HIDDEN(!this.lyricHidden)
     },
 
     samCoverUrl(hash) {

@@ -37,8 +37,19 @@
           </template>
           <template v-slot:append>
             <q-icon v-if="keywords.length === 0" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="onRemoveAllSearchKeyword()" />
+            <q-icon v-else name="arrow_drop_down" class="cursor-pointer" @click.stop="showSearchKeywordMenu = !showSearchKeywordMenu" />
+            <q-icon v-if="keywords.length" name="clear" class="cursor-pointer" @click="onRemoveAllSearchKeyword()" />
           </template>
+          <q-menu v-model="showSearchKeywordMenu" anchor="bottom left" self="top left">
+            <q-list dense style="min-width: 220px;">
+              <q-item v-for="(keyword, index) in keywords" :key="keyword">
+                <q-item-section>{{ keyword }}</q-item-section>
+                <q-item-section side>
+                  <q-btn flat round dense size="sm" icon="close" @click="onRemoveSearchKeyword(index)" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </q-input>
       </q-toolbar>
 
@@ -236,6 +247,7 @@ export default {
     return {
       editKeyword: '',
       keywords: [],
+      showSearchKeywordMenu: false,
       drawerOpen: false,
       miniState: true,
       confirm: false,

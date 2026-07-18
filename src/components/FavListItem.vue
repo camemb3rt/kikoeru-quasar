@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable class="row" :class="{ 'bg-black': $q.dark.isActive }">
+  <q-item clickable class="row fav-list-item" :class="{ 'bg-black': $q.dark.isActive }">
     <q-item-section class="col-auto" top>
       <router-link :to="`/work/RJ${metadata.id}`">
         <q-img transition="fade" :src="coverUrl" style="height: 120px; width: 160px;" />
@@ -28,6 +28,12 @@
         </router-link>
       </div>
 
+      <div v-if="tags.length" class="row q-gutter-xs">
+        <q-chip v-for="tag in tags" :key="tag.id || tag.name" dense size="sm" color="grey-8" text-color="white" class="favorite-tag cursor-pointer" :class="{ 'favorite-tag-match': matchesTagFilter(tag.name) }" @click.native.stop="$emit('filter-tag', tag.name)">
+          {{ tag.name }}
+        </q-chip>
+      </div>
+
       <div class="row items-center q-gutter-x-xs">
         <q-rating v-if="!hideRating" v-model="rating" @input="setRating" size="sm" color="blue" icon="star_border"
           icon-selected="star" icon-half="star_half" class="col-auto" />
@@ -52,6 +58,12 @@
           { label: 'Postponed', value: 'postponed' }
           ]" />
       </q-item-label>
+    </q-item-section>
+
+    <q-item-section v-if="mode === 'favorite' || mode === 'progress'" side class="favorite-remove-action">
+      <q-btn round dense flat color="red" icon="close" @click.stop="removeFromCurrentList">
+        <q-tooltip>{{ mode === 'favorite' ? 'Remove from favourites' : 'Clear progress' }}</q-tooltip>
+      </q-btn>
     </q-item-section>
 
     <WriteReview v-if="showReviewDialog" @closed="processReview" :workid="workid" :metadata="metadata"></WriteReview>
@@ -84,6 +96,10 @@ export default {
     mode: {
       type: String,
       default: 'review'
+    },
+    tagFilter: {
+      type: String,
+      default: ''
     }
   },
 
@@ -101,6 +117,10 @@ export default {
       const token = this.$q.localStorage.getItem('jwt-token') || ''
       return this.workid ? `/api/cover/${this.workid}?type=240x240&token=${token}` : ""
     },
+
+    tags() {
+      return Array.isArray(this.metadata.tags) ? this.metadata.tags.filter(tag => tag && tag.name) : [];
+    }
   },
 
   mounted() {
@@ -129,6 +149,40 @@ export default {
       }
 
       this.progress = this.metadata.progress;
+    },
+
+    removeFavorite() {
+      this.$axios.put('/api/review/favorite', { work_id: this.metadata.id, favorite: false })
+        .then(response => {
+          this.showSuccNotif(response.data.message);
+          this.$emit('reset');
+        })
+        .catch(error => {
+          this.showErrNotif(error.response ? error.response.data.error : error.message);
+        });
+    },
+
+    removeFromCurrentList() {
+      if (this.mode === 'favorite') {
+        this.removeFavorite();
+      } else {
+        this.clearProgress();
+      }
+    },
+
+    clearProgress() {
+      this.progress = '';
+      this.submitProgress({
+        user_name: this.$store.state.User.name,
+        work_id: this.metadata.id,
+        progress: null
+      });
+    },
+
+    matchesTagFilter(tagName) {
+      const tagTerms = this.tagFilter.toLowerCase().split(',').map(tag => tag.trim()).filter(Boolean);
+      const normalizedTagName = tagName.toLowerCase();
+      return tagTerms.some(term => normalizedTagName.includes(term));
     },
 
     processReview(modified) {
@@ -202,3 +256,24 @@ export default {
 
 }
 </script>
+
+<style scoped>
+.favorite-remove-action {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.fav-list-item:hover .favorite-remove-action {
+  opacity: 1;
+}
+
+.favorite-tag {
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.favorite-tag:hover,
+.favorite-tag-match {
+  background-color: var(--q-color-primary) !important;
+  color: white !important;
+}
+</style>

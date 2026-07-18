@@ -79,6 +79,15 @@ export default {
       }
     },
 
+    mediaSessionArtworkUrl () {
+      const hash = this.currentPlayingFile.hash
+      if (!hash || typeof window === 'undefined') return ''
+
+      const token = this.$q.localStorage.getItem('jwt-token') || ''
+      const workId = hash.split('/')[0]
+      return new URL(`/api/cover/${workId}?type=sam&token=${token}`, window.location.origin).href
+    },
+
     ...mapState('AudioPlayer', [
       'playing',
       'queue',
@@ -105,6 +114,7 @@ export default {
         // 缓冲至可播放状态
         flag ? this.player.play() : this.player.pause()
       }
+      this.updateMediaSessionPlaybackState(flag)
       // this.playLrc(flag);
     },
 
@@ -115,6 +125,11 @@ export default {
         this.player.media.load();
         this.loadLrcFile();
       }
+      this.updateMediaSessionMetadata()
+    },
+
+    currentPlayingFile () {
+      this.updateMediaSessionMetadata()
     },
 
     muted (flag) {
@@ -177,6 +192,7 @@ export default {
       'PLAY',
       'SET_TRACK',
       'NEXT_TRACK',
+      'PREVIOUS_TRACK',
       'SET_CURRENT_LYRIC',
       'SET_LYRIC_AVAILABLE',
       'SET_VOLUME',
@@ -184,6 +200,70 @@ export default {
       'SET_REWIND_SEEK_MODE',
       'SET_FORWARD_SEEK_MODE'
     ]),
+
+    canUseMediaSession () {
+      return typeof navigator !== 'undefined' && 'mediaSession' in navigator && typeof window.MediaMetadata !== 'undefined'
+    },
+
+    updateMediaSessionMetadata () {
+      if (!this.canUseMediaSession()) return
+
+      const file = this.currentPlayingFile
+      if (!file.hash) {
+        navigator.mediaSession.metadata = null
+        return
+      }
+
+      const artwork = this.mediaSessionArtworkUrl
+      navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: file.title || file.workTitle || 'Kikoeru',
+        artist: file.workTitle || '',
+        album: file.workTitle || '',
+        artwork: artwork
+          ? [{ src: artwork, sizes: '512x512', type: 'image/jpeg' }]
+          : []
+      })
+    },
+
+    updateMediaSessionPlaybackState (playing) {
+      if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return
+      navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
+    },
+
+    setMediaSessionActionHandler (action, handler) {
+      if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return
+      try {
+        navigator.mediaSession.setActionHandler(action, handler)
+      } catch (_) {
+        // Some browsers expose Media Session without supporting every action.
+      }
+    },
+
+    setupMediaSession () {
+      if (!this.canUseMediaSession()) return
+
+      this.setMediaSessionActionHandler('play', () => {
+        this.PLAY()
+        this.player.play()
+      })
+      this.setMediaSessionActionHandler('pause', () => {
+        this.player.pause()
+        this.PAUSE()
+      })
+      this.setMediaSessionActionHandler('previoustrack', () => this.PREVIOUS_TRACK())
+      this.setMediaSessionActionHandler('nexttrack', () => this.NEXT_TRACK())
+      this.setMediaSessionActionHandler('seekbackward', details => {
+        this.player.currentTime = Math.max(0, this.player.currentTime - (details.seekOffset || 10))
+      })
+      this.setMediaSessionActionHandler('seekforward', details => {
+        this.player.currentTime = Math.min(this.player.duration, this.player.currentTime + (details.seekOffset || 10))
+      })
+      this.setMediaSessionActionHandler('seekto', details => {
+        if (typeof details.seekTime === 'number') this.player.currentTime = details.seekTime
+      })
+      this.updateMediaSessionMetadata()
+      this.updateMediaSessionPlaybackState(this.playing)
+    },
 
     onCanplay () {
       // 缓冲至可播放状态时触发 (只有缓冲至可播放状态, 才能获取媒体文件的播放时长)
@@ -193,6 +273,7 @@ export default {
       if (this.playing && this.player.currentTime !== this.player.duration) {
         this.player.play()
       }
+      this.updateMediaSessionMetadata()
     },
 
     onTimeupdate () {
@@ -337,6 +418,7 @@ export default {
     // 初始化音量
     this.SET_VOLUME(this.player.volume);
     this.initLrcObj();
+    this.setupMediaSession();
     if (this.source) {
       this.loadLrcFile();
     }

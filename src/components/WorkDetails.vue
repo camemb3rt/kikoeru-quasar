@@ -194,6 +194,22 @@
         class="q-mt-sm shadow-4 q-mx-xs q-px-sm"
         label="Refresh metadata"
       />
+      <q-btn
+        v-if="isAdmin"
+        dense
+        :loading="uploadingCover"
+        @click="$refs.coverUpload.pickFiles()"
+        color="cyan"
+        class="q-mt-sm shadow-4 q-mx-xs q-px-sm"
+        label="Upload cover"
+      />
+      <q-file
+        ref="coverUpload"
+        v-model="coverUploadFile"
+        accept="image/jpeg"
+        style="display: none"
+        @input="uploadCover"
+      />
 
       <q-dialog v-model="showMetadataRefreshConfirmation" persistent>
         <q-card style="max-width: 420px; width: calc(100vw - 32px);">
@@ -275,7 +291,9 @@ export default {
       refreshLogs: [],
       waitingForMetadataSocket: false,
       coverRefreshKey: 0,
-      favorite: false
+      favorite: false,
+      coverUploadFile: null,
+      uploadingCover: false
     };
   },
 
@@ -393,6 +411,36 @@ export default {
 
     appendRefreshLog(message, level = 'info') {
       this.refreshLogs.push({ level, message });
+    },
+
+    uploadCover(file) {
+      if (!file) return;
+      if (file.type !== 'image/jpeg') {
+        this.showErrNotif('Please select a JPEG image.');
+        this.coverUploadFile = null;
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        this.showErrNotif('The cover image must be smaller than 10 MB.');
+        this.coverUploadFile = null;
+        return;
+      }
+
+      this.uploadingCover = true;
+      this.$axios.put(`/api/cover/${this.metadata.id}`, file, {
+        headers: { 'Content-Type': 'image/jpeg' }
+      })
+        .then(response => {
+          this.showSuccNotif(response.data.message);
+          this.coverRefreshKey += 1;
+        })
+        .catch(error => {
+          this.showErrNotif(error.response ? error.response.data.error : error.message);
+        })
+        .finally(() => {
+          this.uploadingCover = false;
+          this.coverUploadFile = null;
+        });
     },
 
     toggleFavorite() {

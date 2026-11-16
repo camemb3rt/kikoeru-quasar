@@ -206,7 +206,7 @@
       <q-file
         ref="coverUpload"
         v-model="coverUploadFile"
-        accept="image/jpeg"
+        accept="image/jpeg,image/png"
         style="display: none"
         @input="uploadCover"
       />
@@ -420,8 +420,8 @@ export default {
 
     uploadCover(file) {
       if (!file) return;
-      if (file.type !== 'image/jpeg') {
-        this.showErrNotif('Please select a JPEG image.');
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        this.showErrNotif('Please select a JPEG or PNG image.');
         this.coverUploadFile = null;
         return;
       }
@@ -433,7 +433,7 @@ export default {
 
       this.uploadingCover = true;
       this.$axios.put(`/api/cover/${this.metadata.id}`, file, {
-        headers: { 'Content-Type': 'image/jpeg' }
+        headers: { 'Content-Type': file.type }
       })
         .then(response => {
           this.showSuccNotif(response.data.message);

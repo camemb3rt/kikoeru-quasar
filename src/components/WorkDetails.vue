@@ -186,7 +186,7 @@
 
       <q-btn dense @click="showReviewDialog = true" color="cyan q-mt-sm shadow-4 q-mx-xs q-px-sm" label="Write a review" />
       <q-btn
-        v-if="isAdmin"
+        v-if="canManageMetadata"
         dense
         :loading="refreshingMetadata"
         @click="requestMetadataRefresh"
@@ -195,7 +195,7 @@
         label="Refresh metadata"
       />
       <q-btn
-        v-if="isAdmin"
+        v-if="canManageMetadata"
         dense
         :loading="uploadingCover"
         @click="$refs.coverUpload.pickFiles()"
@@ -306,6 +306,11 @@ export default {
     },
     isAdmin() {
       return this.$store.state.User.name === 'admin';
+    },
+    canManageMetadata() {
+      // When authentication is disabled (the usual single-user Docker setup),
+      // the API permits these actions without a logged-in admin account.
+      return !this.$store.state.User.auth || this.isAdmin;
     }
   },
 
